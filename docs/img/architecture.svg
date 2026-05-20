@@ -104,5 +104,5 @@
   <path class="ln" d="M610 390 L760 465" marker-end="url(#arrow)"/>
   <path class="ln" d="M920 525 L940 525" marker-end="url(#arrow)"/>
 
-  <text x="40" y="615" class="sub">© PromptShield-Lab · MIT · github.com/sandeepmothukuri/PromptShield-Lab</text>
+  <text x="40" y="615" class="sub">© PromptShield-Lab · MIT · github.com/sandeepmothukuri/PromptShield</text>
 </svg>

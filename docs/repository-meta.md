@@ -5,7 +5,7 @@
 > Open-source AI security & SOC detection lab. Simulate prompt injection, LLM jailbreaks, AI phishing, and data exfiltration — then detect, hunt, and respond using Wazuh, Suricata, Zeek, OpenSearch, and Sigma. 25+ detections mapped to MITRE ATT&CK and OWASP LLM Top 10. One `docker compose up` away.
 
 ## Website field
-https://github.com/sandeepmothukuri/PromptShield-Lab
+https://github.com/sandeepmothukuri/PromptShield
 
 ## Topics / Tags
 

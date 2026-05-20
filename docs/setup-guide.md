@@ -20,7 +20,7 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 ## 2. Clone and configure
 
 ```bash
-git clone https://github.com/sandeepmothukuri/PromptShield-Lab.git
+git clone https://github.com/sandeepmothukuri/PromptShield.git
 cd PromptShield-Lab
 cp .env.example .env
 # Edit .env for any password/model changes

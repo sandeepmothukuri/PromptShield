@@ -18,7 +18,7 @@
 [![OWASP LLM Top 10](https://img.shields.io/badge/OWASP-LLM%20Top%2010-000000)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 [![CI](https://img.shields.io/badge/CI-passing-brightgreen)](.github/workflows/ci.yml)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Stars](https://img.shields.io/github/stars/sandeepmothukuri/PromptShield-Lab?style=social)](https://github.com/sandeepmothukuri/PromptShield-Lab)
+[![Stars](https://img.shields.io/github/stars/sandeepmothukuri/PromptShield?style=social)](https://github.com/sandeepmothukuri/PromptShield)
 
 <br/>
 
@@ -125,7 +125,7 @@ See [`docs/architecture.md`](docs/architecture.md) for component-by-component de
 ### One-shot install
 
 ```bash
-git clone https://github.com/sandeepmothukuri/PromptShield-Lab.git
+git clone https://github.com/sandeepmothukuri/PromptShield.git
 cd PromptShield-Lab
 cp .env.example .env
 docker compose up -d

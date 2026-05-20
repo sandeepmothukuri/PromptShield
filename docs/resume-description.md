@@ -7,7 +7,7 @@
 ## Bulleted (project section)
 
 **PromptShield-Lab — AI Security Detection Engineering Lab** · *Personal Open-Source Project · 2026*
-*github.com/sandeepmothukuri/PromptShield-Lab*
+*github.com/sandeepmothukuri/PromptShield*
 
 - Architected and shipped a self-hosted lab that simulates prompt-injection, LLM jailbreak, AI-phishing, and data-exfiltration attacks against a local **Ollama + OpenWebUI + LangChain** stack and monitors them with a **Wazuh + Suricata + Zeek + OpenSearch** SOC pipeline.
 - Authored **Sigma, Wazuh, Suricata, and Zeek detections** mapped to **MITRE ATT&CK** and **OWASP LLM Top 10**; built CI-as-code validation in **GitHub Actions** (Sigma lint, YAML lint, `pytest`).

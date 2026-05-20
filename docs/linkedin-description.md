@@ -3,7 +3,7 @@
 ## Short (for the *Projects* section)
 
 **PromptShield-Lab — AI Security & SOC Detection Lab**
-Open-source lab simulating prompt-injection, LLM jailbreaks, AI phishing, and data exfiltration against a local Ollama-based LLM stack, with end-to-end detections in Wazuh, Suricata, Zeek, and OpenSearch. Sigma, Wazuh, Suricata, and Zeek detections mapped to MITRE ATT&CK and OWASP LLM Top 10. Built entirely with free/open tooling and orchestrated by Docker Compose. ➜ github.com/sandeepmothukuri/PromptShield-Lab
+Open-source lab simulating prompt-injection, LLM jailbreaks, AI phishing, and data exfiltration against a local Ollama-based LLM stack, with end-to-end detections in Wazuh, Suricata, Zeek, and OpenSearch. Sigma, Wazuh, Suricata, and Zeek detections mapped to MITRE ATT&CK and OWASP LLM Top 10. Built entirely with free/open tooling and orchestrated by Docker Compose. ➜ github.com/sandeepmothukuri/PromptShield
 
 ## Long (for a *Featured* post)
 
@@ -27,6 +27,6 @@ SOC analysts pivoting into AI security · Detection engineers · Red-team / purp
 **Tech**: Python · Docker · Wazuh · Suricata · Zeek · OpenSearch · Sigma · Atomic Red Team · Ollama · LangChain
 
 ⭐ Star it, fork it, break it — PRs welcome.
-👉 github.com/sandeepmothukuri/PromptShield-Lab
+👉 github.com/sandeepmothukuri/PromptShield
 
 #AISecurity #SOC #DetectionEngineering #LLMSecurity #PromptInjection #MITREATTACK #Cybersecurity #BlueTeam #OpenSource
