@@ -1,0 +1,16 @@
+<!--
+  PromptShield-Lab — Wazuh decoders for the LLM-Monitor JSON audit log.
+  Source: /var/log/promptshield/monitor.json (one JSON object per line).
+-->
+
+<decoder name="promptshield-json">
+  <prematch>^{"ts":</prematch>
+  <plugin_decoder>JSON_Decoder</plugin_decoder>
+</decoder>
+
+<decoder name="promptshield-json-children">
+  <parent>promptshield-json</parent>
+  <use_own_name>true</use_own_name>
+  <regex offset="after_parent">"verdict":"(\S+?)"</regex>
+  <order>verdict</order>
+</decoder>

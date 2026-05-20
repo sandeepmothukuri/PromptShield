@@ -1,0 +1,36 @@
+# PromptShield-Lab — Suricata signatures
+# Tuned for clear-text LLM-Monitor traffic on the lab network. SID range 9000000+.
+
+alert http any any -> any any (msg:"PROMPTSHIELD Direct prompt injection - 'ignore previous instructions'";
+    flow:established,to_server; http.method; content:"POST";
+    http.request_body; content:"ignore previous instructions"; nocase;
+    classtype:policy-violation; sid:9000001; rev:1;
+    metadata:owasp llm01, mitre T1059;)
+
+alert http any any -> any any (msg:"PROMPTSHIELD Jailbreak persona - DAN";
+    flow:established,to_server; http.request_body;
+    content:"DAN mode"; nocase;
+    classtype:policy-violation; sid:9000002; rev:1;
+    metadata:owasp llm01, mitre T1027;)
+
+alert http any any -> any any (msg:"PROMPTSHIELD System prompt leakage probe";
+    flow:established,to_server; http.request_body;
+    content:"repeat the words above"; nocase;
+    classtype:policy-violation; sid:9000003; rev:1;
+    metadata:owasp llm06, mitre T1552;)
+
+alert http any any <> any any (msg:"PROMPTSHIELD AWS key leak in LLM completion";
+    http.response_body; pcre:"/AKIA[0-9A-Z]{16}/";
+    classtype:credential-theft; sid:9000004; rev:1;
+    metadata:owasp llm06, mitre T1041;)
+
+alert http any any -> any any (msg:"PROMPTSHIELD AI phishing email generation";
+    flow:established,to_server; http.request_body;
+    content:"write a phishing email"; nocase;
+    classtype:policy-violation; sid:9000005; rev:1;
+    metadata:owasp llm09, mitre T1566.001;)
+
+alert dns any any -> any any (msg:"PROMPTSHIELD Possible DNS exfil via LLM (long subdomain)";
+    dns.query; pcre:"/^[a-f0-9]{60,}\\./i";
+    classtype:data-exfiltration; sid:9000006; rev:1;
+    metadata:owasp llm06, mitre T1048.003;)

@@ -1,0 +1,139 @@
+name: promptshield-lab
+
+# ------------------------------------------------------------------------------
+# PromptShield-Lab — full SOC + LLM stack
+# Brings up: Ollama, OpenWebUI, LLM-Monitor proxy, Wazuh, Suricata, Zeek,
+# OpenSearch, OpenSearch Dashboards. One command, one network, persistent
+# volumes. See docs/setup-guide.md for first-run steps.
+# ------------------------------------------------------------------------------
+
+networks:
+  promptshield:
+    driver: bridge
+
+volumes:
+  ollama_data:
+  openwebui_data:
+  wazuh_data:
+  wazuh_etc:
+  wazuh_logs:
+  opensearch_data:
+  suricata_logs:
+  zeek_logs:
+  monitor_logs:
+
+services:
+
+  # ---------- LLM runtime ----------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: psl-ollama
+    restart: unless-stopped
+    ports: ["11434:11434"]
+    volumes: ["ollama_data:/root/.ollama"]
+    networks: [promptshield]
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: psl-openwebui
+    restart: unless-stopped
+    depends_on: [ollama]
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_AUTH=true
+    ports: ["3000:8080"]
+    volumes: ["openwebui_data:/app/backend/data"]
+    networks: [promptshield]
+
+  # ---------- LLM monitoring / guardrails ----------
+  llm-monitor:
+    build: ./llm-monitor
+    container_name: psl-llm-monitor
+    restart: unless-stopped
+    depends_on: [ollama]
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - LOG_PATH=/var/log/promptshield/monitor.json
+      - CLASSIFIER_THRESHOLD=0.65
+    ports: ["8080:8080"]
+    volumes:
+      - monitor_logs:/var/log/promptshield
+    networks: [promptshield]
+
+  # ---------- SIEM ----------
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.9.0
+    container_name: psl-wazuh-manager
+    restart: unless-stopped
+    hostname: wazuh-manager
+    ports:
+      - "1514:1514/udp"
+      - "1515:1515"
+      - "514:514/udp"
+      - "55000:55000"
+    volumes:
+      - wazuh_etc:/var/ossec/etc
+      - wazuh_logs:/var/ossec/logs
+      - wazuh_data:/var/ossec/queue
+      - monitor_logs:/var/log/promptshield:ro
+      - ./detections/wazuh/local_rules.xml:/var/ossec/etc/rules/local_rules.xml:ro
+      - ./detections/wazuh/decoders.xml:/var/ossec/etc/decoders/local_decoder.xml:ro
+    networks: [promptshield]
+
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:4.9.0
+    container_name: psl-wazuh-dashboard
+    restart: unless-stopped
+    depends_on: [wazuh-manager]
+    ports: ["5601:5601"]
+    networks: [promptshield]
+
+  # ---------- Network detection ----------
+  suricata:
+    image: jasonish/suricata:latest
+    container_name: psl-suricata
+    restart: unless-stopped
+    network_mode: host
+    cap_add: [NET_ADMIN, SYS_NICE]
+    volumes:
+      - suricata_logs:/var/log/suricata
+      - ./detections/suricata/promptshield.rules:/etc/suricata/rules/promptshield.rules:ro
+    command: -i eth0 -S /etc/suricata/rules/promptshield.rules
+
+  zeek:
+    image: blacktop/zeek:latest
+    container_name: psl-zeek
+    restart: unless-stopped
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW]
+    volumes:
+      - zeek_logs:/usr/local/zeek/logs
+      - ./detections/zeek/llm_telemetry.zeek:/usr/local/zeek/share/zeek/site/llm_telemetry.zeek:ro
+    command: zeek -i eth0 /usr/local/zeek/share/zeek/site/llm_telemetry.zeek
+
+  # ---------- Search / dashboards ----------
+  opensearch:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: psl-opensearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+    ports: ["9200:9200"]
+    volumes: ["opensearch_data:/usr/share/opensearch/data"]
+    networks: [promptshield]
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.13.0
+    container_name: psl-opensearch-dashboards
+    restart: unless-stopped
+    depends_on: [opensearch]
+    environment:
+      - OPENSEARCH_HOSTS=http://opensearch:9200
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports: ["5602:5601"]
+    networks: [promptshield]

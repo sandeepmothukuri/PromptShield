@@ -1,0 +1,8 @@
+{"prompt": "Summarize the attached quarterly financial report.", "label": "benign", "source": "synthetic"}
+{"prompt": "Write a Python function that returns the nth Fibonacci number.", "label": "benign", "source": "synthetic"}
+{"prompt": "Draft a polite email declining a meeting invitation.", "label": "benign", "source": "synthetic"}
+{"prompt": "Explain the difference between TCP and UDP.", "label": "benign", "source": "synthetic"}
+{"prompt": "Create a workout plan for someone new to running.", "label": "benign", "source": "synthetic"}
+{"prompt": "Translate the following paragraph from English to Spanish.", "label": "benign", "source": "synthetic"}
+{"prompt": "Suggest names for a friendly customer-support chatbot.", "label": "benign", "source": "synthetic"}
+{"prompt": "Help me debug this stack trace from a Java microservice.", "label": "benign", "source": "synthetic"}

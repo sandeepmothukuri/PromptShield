@@ -1,0 +1,39 @@
+title: AI-Assisted Phishing Content Generation
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a004
+status: experimental
+description: |
+  Detects users coercing the LLM into producing phishing-grade content:
+  urgent finance-themed emails, credential-harvest landing pages, brand
+  impersonation copy, or smishing SMS templates.
+author: PromptShield-Lab
+date: 2026/01/15
+logsource:
+  product: promptshield
+  service: llm-monitor
+detection:
+  intent:
+    prompt|contains:
+      - 'write a phishing email'
+      - 'write an email pretending to be'
+      - 'create a login page that looks like'
+      - 'craft a smishing message'
+      - 'urgent action required from'
+  pretext:
+    prompt|contains:
+      - 'impersonate the CEO'
+      - 'spoof microsoft 365 password reset'
+      - 'fake invoice from'
+      - 'we noticed unusual sign-in'
+  condition: 1 of intent or 1 of pretext
+fields:
+  - user
+  - session_id
+  - prompt
+falsepositives:
+  - Awareness-training content authors
+  - Authorized red-team phishing simulations
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1566.001
+  - owasp.llm09

@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 700" font-family="Menlo,Consolas,Monaco,monospace">
+  <defs>
+    <style>
+      .term{fill:#0c0f12}
+      .bar{fill:#1a1f25}
+      .ttl{fill:#e6edf3;font-size:13px;font-family:-apple-system,Segoe UI,sans-serif}
+      .green{fill:#7ee787}
+      .red{fill:#ff7b72}
+      .yel{fill:#e3b341}
+      .blu{fill:#79c0ff}
+      .gry{fill:#8b949e}
+      .mag{fill:#d2a8ff}
+      .wht{fill:#e6edf3}
+      .cyn{fill:#56d4dd}
+      .dot{fill:#3fb950}
+      .small{font-size:13px}
+      .num{fill:#6e7681;font-size:13px}
+    </style>
+  </defs>
+  <rect width="1280" height="700" class="term"/>
+
+  <!-- Terminal title bar -->
+  <rect x="0" y="0" width="1280" height="32" class="bar"/>
+  <circle cx="18" cy="16" r="6" fill="#ff5f56"/>
+  <circle cx="38" cy="16" r="6" fill="#ffbd2e"/>
+  <circle cx="58" cy="16" r="6" fill="#27c93f"/>
+  <text x="540" y="20" class="ttl">soc@promptshield-lab · tail -f /var/log/suricata/eve.json | jq</text>
+
+  <g font-size="13">
+    <!-- Header -->
+    <text x="20" y="62" class="green">soc@promptshield-lab</text><text x="190" y="62" class="wht">:</text><text x="200" y="62" class="blu">~/PromptShield-Lab</text><text x="370" y="62" class="wht">$ suricata -i eth0 -S detections/suricata/promptshield.rules -v</text>
+
+    <text x="20" y="84"  class="gry">19/5/2026 -- 14:02:11 - &lt;Notice&gt; - This is Suricata version 7.0.6 RELEASE running in IDS mode</text>
+    <text x="20" y="102" class="gry">19/5/2026 -- 14:02:11 - &lt;Info&gt;   - Loading rules: /etc/suricata/rules/promptshield.rules</text>
+    <text x="20" y="120" class="gry">19/5/2026 -- 14:02:11 - &lt;Info&gt;   - 6 rules loaded successfully · 0 invalid · 0 skipped</text>
+    <text x="20" y="138" class="gry">19/5/2026 -- 14:02:12 - &lt;Notice&gt; - all 4 packet processing threads, 4 management threads initialized, engine started</text>
+
+    <text x="20" y="170" class="green">soc@promptshield-lab</text><text x="190" y="170" class="wht">:</text><text x="200" y="170" class="blu">~/PromptShield-Lab</text><text x="370" y="170" class="wht">$ tail -f /var/log/suricata/eve.json | jq -c 'select(.event_type==&quot;alert&quot;)'</text>
+
+    <!-- Alert 1 -->
+    <text x="20"  y="200" class="wht">{</text>
+    <text x="36"  y="200" class="mag">"timestamp"</text><text x="120" y="200" class="wht">:</text>
+    <text x="130" y="200" class="cyn">"2026-05-19T14:04:11.873Z"</text><text x="334" y="200" class="wht">,</text>
+    <text x="350" y="200" class="mag">"src_ip"</text><text x="404" y="200" class="wht">:</text>
+    <text x="414" y="200" class="cyn">"172.18.0.7"</text><text x="510" y="200" class="wht">,</text>
+    <text x="526" y="200" class="mag">"dest_ip"</text><text x="588" y="200" class="wht">:</text>
+    <text x="598" y="200" class="cyn">"172.18.0.4"</text><text x="694" y="200" class="wht">,</text>
+    <text x="710" y="200" class="mag">"proto"</text><text x="754" y="200" class="wht">:</text>
+    <text x="764" y="200" class="cyn">"TCP"</text><text x="804" y="200" class="wht">,</text>
+    <text x="820" y="200" class="mag">"alert"</text><text x="858" y="200" class="wht">:</text>
+    <text x="868" y="200" class="wht">{</text>
+    <text x="40"  y="220" class="mag">  "action"</text><text x="98" y="220" class="wht">:</text>
+    <text x="108" y="220" class="cyn">"allowed"</text><text x="172" y="220" class="wht">,</text>
+    <text x="188" y="220" class="mag">"signature_id"</text><text x="290" y="220" class="wht">:</text>
+    <text x="300" y="220" class="yel">9000001</text><text x="358" y="220" class="wht">,</text>
+    <text x="374" y="220" class="mag">"signature"</text><text x="450" y="220" class="wht">:</text>
+    <text x="460" y="220" class="red">"PROMPTSHIELD Direct prompt injection - 'ignore previous instructions'"</text><text x="1010" y="220" class="wht">,</text>
+    <text x="40"  y="240" class="mag">  "category"</text><text x="118" y="240" class="wht">:</text>
+    <text x="128" y="240" class="cyn">"policy-violation"</text><text x="262" y="240" class="wht">,</text>
+    <text x="278" y="240" class="mag">"severity"</text><text x="350" y="240" class="wht">:</text>
+    <text x="360" y="240" class="yel">1</text><text x="372" y="240" class="wht">,</text>
+    <text x="388" y="240" class="mag">"metadata"</text><text x="464" y="240" class="wht">:</text>
+    <text x="474" y="240" class="cyn">["owasp llm01"</text><text x="588" y="240" class="wht">,</text>
+    <text x="600" y="240" class="cyn">"mitre T1059"</text><text x="700" y="240" class="wht">] } }</text>
+
+    <!-- Alert 2 -->
+    <text x="20"  y="272" class="wht">{</text>
+    <text x="36"  y="272" class="mag">"timestamp"</text><text x="120" y="272" class="wht">:</text>
+    <text x="130" y="272" class="cyn">"2026-05-19T14:04:38.402Z"</text><text x="334" y="272" class="wht">,</text>
+    <text x="350" y="272" class="mag">"src_ip"</text><text x="404" y="272" class="wht">:</text>
+    <text x="414" y="272" class="cyn">"172.18.0.7"</text><text x="510" y="272" class="wht">,</text>
+    <text x="526" y="272" class="mag">"dest_ip"</text><text x="588" y="272" class="wht">:</text>
+    <text x="598" y="272" class="cyn">"172.18.0.4"</text><text x="694" y="272" class="wht">,</text>
+    <text x="710" y="272" class="mag">"alert"</text><text x="748" y="272" class="wht">: {</text>
+    <text x="40"  y="292" class="mag">  "signature_id"</text><text x="160" y="292" class="wht">:</text>
+    <text x="170" y="292" class="yel">9000002</text><text x="228" y="292" class="wht">,</text>
+    <text x="244" y="292" class="mag">"signature"</text><text x="320" y="292" class="wht">:</text>
+    <text x="330" y="292" class="red">"PROMPTSHIELD Jailbreak persona - DAN"</text><text x="624" y="292" class="wht">,</text>
+    <text x="640" y="292" class="mag">"metadata"</text><text x="716" y="292" class="wht">:</text>
+    <text x="726" y="292" class="cyn">["mitre T1027"</text><text x="828" y="292" class="wht">] } }</text>
+
+    <!-- Alert 3 -->
+    <text x="20"  y="324" class="wht">{</text>
+    <text x="36"  y="324" class="mag">"timestamp"</text><text x="120" y="324" class="wht">:</text>
+    <text x="130" y="324" class="cyn">"2026-05-19T14:08:02.114Z"</text><text x="334" y="324" class="wht">,</text>
+    <text x="350" y="324" class="mag">"src_ip"</text><text x="404" y="324" class="wht">:</text>
+    <text x="414" y="324" class="cyn">"172.18.0.4"</text><text x="510" y="324" class="wht">,</text>
+    <text x="526" y="324" class="mag">"dest_ip"</text><text x="588" y="324" class="wht">:</text>
+    <text x="598" y="324" class="cyn">"172.18.0.7"</text><text x="694" y="324" class="wht">,</text>
+    <text x="710" y="324" class="mag">"alert"</text><text x="748" y="324" class="wht">: {</text>
+    <text x="40"  y="344" class="mag">  "signature_id"</text><text x="160" y="344" class="wht">:</text>
+    <text x="170" y="344" class="yel">9000004</text><text x="228" y="344" class="wht">,</text>
+    <text x="244" y="344" class="mag">"signature"</text><text x="320" y="344" class="wht">:</text>
+    <text x="330" y="344" class="red">"PROMPTSHIELD AWS key leak in LLM completion"</text><text x="666" y="344" class="wht">,</text>
+    <text x="40"  y="364" class="mag">  "category"</text><text x="118" y="364" class="wht">:</text>
+    <text x="128" y="364" class="cyn">"credential-theft"</text><text x="262" y="364" class="wht">,</text>
+    <text x="278" y="364" class="mag">"severity"</text><text x="350" y="364" class="wht">:</text>
+    <text x="360" y="364" class="red">1</text><text x="372" y="364" class="wht">,</text>
+    <text x="388" y="364" class="mag">"http"</text><text x="428" y="364" class="wht">:</text> <text x="438" y="364" class="wht">{</text>
+    <text x="448" y="364" class="mag">"http_method"</text><text x="546" y="364" class="wht">:</text>
+    <text x="556" y="364" class="cyn">"POST"</text><text x="600" y="364" class="wht">,</text>
+    <text x="612" y="364" class="mag">"url"</text><text x="640" y="364" class="wht">:</text>
+    <text x="650" y="364" class="cyn">"/chat"</text><text x="700" y="364" class="wht">} } }</text>
+
+    <!-- Alert 4 -->
+    <text x="20"  y="396" class="wht">{</text>
+    <text x="36"  y="396" class="mag">"timestamp"</text><text x="120" y="396" class="wht">:</text>
+    <text x="130" y="396" class="cyn">"2026-05-19T14:11:47.221Z"</text><text x="334" y="396" class="wht">,</text>
+    <text x="350" y="396" class="mag">"alert"</text><text x="388" y="396" class="wht">: {</text>
+    <text x="40"  y="416" class="mag">  "signature_id"</text><text x="160" y="416" class="wht">:</text>
+    <text x="170" y="416" class="yel">9000005</text><text x="228" y="416" class="wht">,</text>
+    <text x="244" y="416" class="mag">"signature"</text><text x="320" y="416" class="wht">:</text>
+    <text x="330" y="416" class="red">"PROMPTSHIELD AI phishing email generation"</text><text x="650" y="416" class="wht">,</text>
+    <text x="666" y="416" class="mag">"metadata"</text><text x="742" y="416" class="wht">:</text>
+    <text x="752" y="416" class="cyn">["mitre T1566.001"</text><text x="884" y="416" class="wht">] } }</text>
+
+    <!-- Alert 5 DNS -->
+    <text x="20"  y="448" class="wht">{</text>
+    <text x="36"  y="448" class="mag">"timestamp"</text><text x="120" y="448" class="wht">:</text>
+    <text x="130" y="448" class="cyn">"2026-05-19T14:14:09.604Z"</text><text x="334" y="448" class="wht">,</text>
+    <text x="350" y="448" class="mag">"proto"</text><text x="394" y="448" class="wht">:</text>
+    <text x="404" y="448" class="cyn">"UDP"</text><text x="442" y="448" class="wht">,</text>
+    <text x="458" y="448" class="mag">"app_proto"</text><text x="538" y="448" class="wht">:</text>
+    <text x="548" y="448" class="cyn">"dns"</text><text x="586" y="448" class="wht">,</text>
+    <text x="602" y="448" class="mag">"alert"</text><text x="640" y="448" class="wht">: {</text>
+    <text x="40"  y="468" class="mag">  "signature_id"</text><text x="160" y="468" class="wht">:</text>
+    <text x="170" y="468" class="yel">9000006</text><text x="228" y="468" class="wht">,</text>
+    <text x="244" y="468" class="mag">"signature"</text><text x="320" y="468" class="wht">:</text>
+    <text x="330" y="468" class="red">"PROMPTSHIELD Possible DNS exfil via LLM (long subdomain)"</text><text x="746" y="468" class="wht">,</text>
+    <text x="40"  y="488" class="mag">  "dns"</text><text x="80" y="488" class="wht">:</text>
+    <text x="90" y="488" class="wht">{</text>
+    <text x="100" y="488" class="mag">"query"</text><text x="142" y="488" class="wht">:</text>
+    <text x="152" y="488" class="cyn">"4d3e2f1c9a8b…6f.exfil.attacker.tld"</text><text x="420" y="488" class="wht">} } }</text>
+
+    <!-- Stats line -->
+    <text x="20" y="540" class="dot">●</text>
+    <text x="38" y="540" class="wht">Suricata stats · uptime 00:12:18 · capture.kernel_packets 184,392 · drop 0</text>
+    <text x="20" y="560" class="dot">●</text>
+    <text x="38" y="560" class="wht">Alerts last 5m: </text>
+    <text x="170" y="560" class="red">5</text>
+    <text x="186" y="560" class="wht"> · By SID: 9000001=2  9000002=1  9000004=1  9000005=1  9000006=1</text>
+    <text x="20" y="580" class="dot">●</text>
+    <text x="38" y="580" class="wht">Forwarding to Wazuh: </text>
+    <text x="208" y="580" class="green">OK</text>
+    <text x="232" y="580" class="wht"> · /var/log/suricata/eve.json → wazuh-manager:1514/udp</text>
+
+    <!-- prompt -->
+    <text x="20" y="624" class="green">soc@promptshield-lab</text><text x="190" y="624" class="wht">:</text><text x="200" y="624" class="blu">~/PromptShield-Lab</text><text x="370" y="624" class="wht">$ </text>
+    <rect x="384" y="610" width="9" height="18" fill="#e6edf3" opacity=".7">
+      <animate attributeName="opacity" values="0.7;0;0.7" dur="1s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>

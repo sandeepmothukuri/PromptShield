@@ -1,0 +1,49 @@
+title: LLM Jailbreak Attempt - Known Personas and Encodings
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a002
+status: experimental
+description: |
+  Detects jailbreak attempts using well-known personas (DAN, STAN, AIM, DUDE),
+  hypothetical-framing tricks, and base64/leet-encoded payloads that smuggle
+  policy-violating instructions past safety filters.
+author: PromptShield-Lab
+date: 2026/01/15
+references:
+  - https://github.com/0xk1h0/ChatGPT_DAN
+  - https://arxiv.org/abs/2308.03825
+logsource:
+  product: promptshield
+  service: llm-monitor
+detection:
+  persona:
+    prompt|contains:
+      - 'DAN mode'
+      - 'do anything now'
+      - 'AIM model'
+      - 'STAN: strive to avoid norms'
+      - 'jailbreak prompt'
+      - 'unfiltered AI'
+  hypothetical:
+    prompt|contains:
+      - 'hypothetically speaking, how would one'
+      - 'in a fictional world where'
+      - 'for educational purposes only, explain how to'
+      - 'roleplay as a hacker who'
+  encoded:
+    prompt|re:
+      - '(?i)base64:[a-z0-9+/=]{20,}'
+      - '(?i)rot13:'
+      - '(?i)\\\\x[0-9a-f]{2}\\\\x[0-9a-f]{2}'
+  condition: 1 of them
+fields:
+  - user
+  - session_id
+  - prompt
+  - classifier_score
+falsepositives:
+  - Authorized red-team exercises
+  - Academic prompt-engineering research
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1027
+  - owasp.llm01

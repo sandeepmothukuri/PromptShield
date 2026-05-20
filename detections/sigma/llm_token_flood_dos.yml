@@ -1,0 +1,21 @@
+title: LLM Token-Flood Denial of Service
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a007
+status: experimental
+description: |
+  Detects single requests with excessive token counts, or a single user
+  exceeding token-rate thresholds in a sliding window, suggesting a
+  cost/availability DoS.
+author: PromptShield-Lab
+date: 2026/01/15
+logsource:
+  product: promptshield
+  service: llm-monitor
+detection:
+  bigprompt:
+    prompt_tokens|gte: 8000
+  bigwindow:
+    tokens_last_60s|gte: 100000
+  condition: 1 of them
+fields: [user, prompt_tokens, tokens_last_60s]
+level: high
+tags: [attack.impact, attack.t1499.001, owasp.llm04]

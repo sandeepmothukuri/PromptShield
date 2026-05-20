@@ -1,0 +1,38 @@
+title: Sensitive Data Exfiltration via LLM Response
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a003
+status: experimental
+description: |
+  Detects LLM responses that contain PII, secrets, or internal identifiers,
+  suggesting either a successful prompt-injection exfil or accidental leakage
+  of context data into the completion. Reads from the `completion` field of
+  the LLM-Monitor audit log.
+author: PromptShield-Lab
+date: 2026/01/15
+logsource:
+  product: promptshield
+  service: llm-monitor
+detection:
+  secrets:
+    completion|re:
+      - 'AKIA[0-9A-Z]{16}'                          # AWS access key
+      - '(?i)aws_secret_access_key\\s*[:=]\\s*[A-Za-z0-9/+=]{40}'
+      - 'sk-[A-Za-z0-9]{32,}'                       # OpenAI-style key
+      - 'ghp_[A-Za-z0-9]{36}'                       # GitHub PAT
+      - 'xox[baprs]-[A-Za-z0-9-]{10,}'              # Slack token
+  pii:
+    completion|re:
+      - '\\b\\d{3}-\\d{2}-\\d{4}\\b'                # US SSN
+      - '\\b4[0-9]{12}(?:[0-9]{3})?\\b'             # Visa
+  condition: 1 of them
+fields:
+  - user
+  - session_id
+  - completion
+falsepositives:
+  - Intentional security demo content
+  - Documentation snippets discussing key formats
+level: critical
+tags:
+  - attack.exfiltration
+  - attack.t1041
+  - owasp.llm06

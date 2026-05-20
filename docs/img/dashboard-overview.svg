@@ -1,0 +1,315 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" font-family="-apple-system,Segoe UI,Inter,sans-serif">
+  <defs>
+    <style>
+      .bg{fill:#1a1c21}
+      .top{fill:#0a121f}
+      .panel{fill:#23272e;stroke:#343a44;stroke-width:1;rx:6}
+      .h1{fill:#fff;font-size:18px;font-weight:600}
+      .h2{fill:#dbe4ee;font-size:13px;font-weight:600}
+      .mut{fill:#8a94a7;font-size:11px}
+      .big{fill:#fff;font-size:34px;font-weight:700}
+      .grn{fill:#54b399}
+      .red{fill:#e7664c}
+      .yel{fill:#d6bf57}
+      .blu{fill:#6092c0}
+      .vio{fill:#9170b8}
+      .gridLine{stroke:#343a44;stroke-width:1}
+      .lbl{fill:#8a94a7;font-size:10px}
+      .axis{fill:#8a94a7;font-size:10px}
+    </style>
+  </defs>
+  <rect width="1280" height="800" class="bg"/>
+
+  <!-- Topbar -->
+  <rect x="0" y="0" width="1280" height="48" class="top"/>
+  <text x="22" y="32" class="h1">⬡ OpenSearch Dashboards · PromptShield Overview</text>
+  <text x="1050" y="32" class="h1" font-size="13" font-weight="400" opacity=".85">Last 24h · Auto-refresh 30s</text>
+
+  <!-- KPI row -->
+  <g transform="translate(20,68)">
+    <rect width="290" height="100" class="panel"/>
+    <text x="18" y="28" class="h2">TOTAL PROMPTS (24H)</text>
+    <text x="18" y="74" class="big">12,847</text>
+    <text x="180" y="74" class="grn" font-size="14" font-weight="600">▲ 8.3%</text>
+  </g>
+  <g transform="translate(330,68)">
+    <rect width="290" height="100" class="panel"/>
+    <text x="18" y="28" class="h2">BLOCKED BY GUARDRAIL</text>
+    <text x="18" y="74" class="big" fill="#e7664c">421</text>
+    <text x="120" y="74" class="red" font-size="14" font-weight="600">3.28%</text>
+  </g>
+  <g transform="translate(640,68)">
+    <rect width="290" height="100" class="panel"/>
+    <text x="18" y="28" class="h2">JAILBREAK ATTEMPTS</text>
+    <text x="18" y="74" class="big" fill="#d6bf57">87</text>
+    <text x="120" y="74" class="yel" font-size="14" font-weight="600">▲ 22%</text>
+  </g>
+  <g transform="translate(950,68)">
+    <rect width="310" height="100" class="panel"/>
+    <text x="18" y="28" class="h2">ACTIVE INCIDENTS</text>
+    <text x="18" y="74" class="big" fill="#e7664c">3</text>
+    <text x="120" y="74" class="red" font-size="14" font-weight="600">P1: 1 · P2: 2</text>
+  </g>
+
+  <!-- Trendline -->
+  <g transform="translate(20,188)">
+    <rect width="600" height="240" class="panel"/>
+    <text x="18" y="28" class="h2">PROMPT VOLUME · 24H (5m buckets)</text>
+    <text x="18" y="46" class="mut">benign · blocked</text>
+    <!-- gridlines -->
+    <line x1="40" y1="200" x2="580" y2="200" class="gridLine"/>
+    <line x1="40" y1="150" x2="580" y2="150" class="gridLine"/>
+    <line x1="40" y1="100" x2="580" y2="100" class="gridLine"/>
+    <line x1="40" y1="60"  x2="580" y2="60"  class="gridLine"/>
+    <!-- benign line -->
+    <polyline fill="none" stroke="#54b399" stroke-width="2"
+      points="40,170 80,150 120,135 160,140 200,118 240,128 280,108 320,98 360,112 400,90 440,82 480,95 520,76 560,88 580,84"/>
+    <!-- blocked line -->
+    <polyline fill="none" stroke="#e7664c" stroke-width="2"
+      points="40,196 80,193 120,191 160,188 200,186 240,182 280,178 320,168 360,170 400,160 440,148 480,140 520,130 560,138 580,134"/>
+    <!-- axis -->
+    <text x="40"  y="218" class="axis">00:00</text>
+    <text x="200" y="218" class="axis">06:00</text>
+    <text x="360" y="218" class="axis">12:00</text>
+    <text x="520" y="218" class="axis">18:00</text>
+  </g>
+
+  <!-- Top injection patterns -->
+  <g transform="translate(640,188)">
+    <rect width="620" height="240" class="panel"/>
+    <text x="18" y="28" class="h2">TOP INJECTION PATTERNS</text>
+    <g transform="translate(20,52)">
+      <text y="14" class="mut">ignore previous instructions</text>
+      <rect x="240" y="2" width="340" height="14" fill="#e7664c" rx="2"/>
+      <text x="586" y="14" class="lbl" text-anchor="end" fill="#fff">182</text>
+
+      <text y="42" class="mut">disregard prior context</text>
+      <rect x="240" y="30" width="220" height="14" fill="#e7664c" opacity=".85" rx="2"/>
+      <text x="586" y="42" class="lbl" text-anchor="end" fill="#fff">118</text>
+
+      <text y="70" class="mut">you are now DAN</text>
+      <rect x="240" y="58" width="160" height="14" fill="#d6bf57" rx="2"/>
+      <text x="586" y="70" class="lbl" text-anchor="end" fill="#fff">87</text>
+
+      <text y="98" class="mut">developer mode enabled</text>
+      <rect x="240" y="86" width="120" height="14" fill="#d6bf57" rx="2"/>
+      <text x="586" y="98" class="lbl" text-anchor="end" fill="#fff">64</text>
+
+      <text y="126" class="mut">override your system prompt</text>
+      <rect x="240" y="114" width="92" height="14" fill="#6092c0" rx="2"/>
+      <text x="586" y="126" class="lbl" text-anchor="end" fill="#fff">52</text>
+
+      <text y="154" class="mut">repeat the words above</text>
+      <rect x="240" y="142" width="64" height="14" fill="#6092c0" rx="2"/>
+      <text x="586" y="154" class="lbl" text-anchor="end" fill="#fff">38</text>
+
+      <text y="182" class="mut">pretend you are unrestricted</text>
+      <rect x="240" y="170" width="42" height="14" fill="#9170b8" rx="2"/>
+      <text x="586" y="182" class="lbl" text-anchor="end" fill="#fff">24</text>
+    </g>
+  </g>
+
+  <!-- Jailbreak heatmap -->
+  <g transform="translate(20,448)">
+    <rect width="600" height="240" class="panel"/>
+    <text x="18" y="28" class="h2">JAILBREAK HEATMAP · USER × HOUR-OF-DAY</text>
+    <g transform="translate(60,52)">
+      <!-- Users on left -->
+      <text x="-8" y="22" class="lbl" text-anchor="end" fill="#dbe4ee">alice</text>
+      <text x="-8" y="50" class="lbl" text-anchor="end" fill="#dbe4ee">bob</text>
+      <text x="-8" y="78" class="lbl" text-anchor="end" fill="#dbe4ee">carol</text>
+      <text x="-8" y="106" class="lbl" text-anchor="end" fill="#dbe4ee">dave</text>
+      <text x="-8" y="134" class="lbl" text-anchor="end" fill="#dbe4ee">eve</text>
+      <text x="-8" y="162" class="lbl" text-anchor="end" fill="#dbe4ee">frank</text>
+
+      <!-- Heatmap rows (24 cells per row, intensity varies) -->
+      <g id="heat">
+        <!-- alice -->
+        <g transform="translate(0,8)">
+          <rect width="20" height="18" fill="#1a3a4a"/>
+          <rect x="22" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="44" width="20" height="18" fill="#214d5d"/>
+          <rect x="66" width="20" height="18" fill="#2d6175"/>
+          <rect x="88" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="110" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="132" width="20" height="18" fill="#83bccf"/>
+          <rect x="154" width="20" height="18" fill="#a8d6e3"/>
+          <rect x="176" width="20" height="18" fill="#83bccf"/>
+          <rect x="198" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="220" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="242" width="20" height="18" fill="#2d6175"/>
+          <rect x="264" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="286" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="308" width="20" height="18" fill="#214d5d"/>
+          <rect x="330" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="352" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="374" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="396" width="20" height="18" fill="#214d5d"/>
+          <rect x="418" width="20" height="18" fill="#214d5d"/>
+          <rect x="440" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="462" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="484" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="506" width="20" height="18" fill="#1a3a4a"/>
+        </g>
+        <!-- bob — heavy jailbreak user -->
+        <g transform="translate(0,36)">
+          <rect width="20" height="18" fill="#214d5d"/>
+          <rect x="22" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="44" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="66" width="20" height="18" fill="#83bccf"/>
+          <rect x="88" width="20" height="18" fill="#a8d6e3"/>
+          <rect x="110" width="20" height="18" fill="#f2c46d"/>
+          <rect x="132" width="20" height="18" fill="#e7664c"/>
+          <rect x="154" width="20" height="18" fill="#bd271e"/>
+          <rect x="176" width="20" height="18" fill="#e7664c"/>
+          <rect x="198" width="20" height="18" fill="#f2c46d"/>
+          <rect x="220" width="20" height="18" fill="#a8d6e3"/>
+          <rect x="242" width="20" height="18" fill="#83bccf"/>
+          <rect x="264" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="286" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="308" width="20" height="18" fill="#214d5d"/>
+          <rect x="330" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="352" width="20" height="18" fill="#214d5d"/>
+          <rect x="374" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="396" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="418" width="20" height="18" fill="#83bccf"/>
+          <rect x="440" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="462" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="484" width="20" height="18" fill="#214d5d"/>
+          <rect x="506" width="20" height="18" fill="#1a3a4a"/>
+        </g>
+        <!-- carol -->
+        <g transform="translate(0,64)">
+          <rect width="20" height="18" fill="#1a3a4a"/>
+          <rect x="22" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="44" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="66" width="20" height="18" fill="#214d5d"/>
+          <rect x="88" width="20" height="18" fill="#214d5d"/>
+          <rect x="110" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="132" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="154" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="176" width="20" height="18" fill="#83bccf"/>
+          <rect x="198" width="20" height="18" fill="#5d9bb0"/>
+          <rect x="220" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="242" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="264" width="20" height="18" fill="#214d5d"/>
+          <rect x="286" width="20" height="18" fill="#214d5d"/>
+          <rect x="308" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="330" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="352" width="20" height="18" fill="#214d5d"/>
+          <rect x="374" width="20" height="18" fill="#214d5d"/>
+          <rect x="396" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="418" width="20" height="18" fill="#3d7b8b"/>
+          <rect x="440" width="20" height="18" fill="#214d5d"/>
+          <rect x="462" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="484" width="20" height="18" fill="#1a3a4a"/>
+          <rect x="506" width="20" height="18" fill="#1a3a4a"/>
+        </g>
+        <g transform="translate(0,92)">
+          <rect width="20" height="18" fill="#1a3a4a"/><rect x="22" width="20" height="18" fill="#1a3a4a"/><rect x="44" width="20" height="18" fill="#1a3a4a"/><rect x="66" width="20" height="18" fill="#1a3a4a"/><rect x="88" width="20" height="18" fill="#214d5d"/><rect x="110" width="20" height="18" fill="#214d5d"/><rect x="132" width="20" height="18" fill="#3d7b8b"/><rect x="154" width="20" height="18" fill="#3d7b8b"/><rect x="176" width="20" height="18" fill="#3d7b8b"/><rect x="198" width="20" height="18" fill="#214d5d"/><rect x="220" width="20" height="18" fill="#214d5d"/><rect x="242" width="20" height="18" fill="#1a3a4a"/><rect x="264" width="20" height="18" fill="#1a3a4a"/><rect x="286" width="20" height="18" fill="#1a3a4a"/><rect x="308" width="20" height="18" fill="#1a3a4a"/><rect x="330" width="20" height="18" fill="#214d5d"/><rect x="352" width="20" height="18" fill="#214d5d"/><rect x="374" width="20" height="18" fill="#1a3a4a"/><rect x="396" width="20" height="18" fill="#1a3a4a"/><rect x="418" width="20" height="18" fill="#1a3a4a"/><rect x="440" width="20" height="18" fill="#1a3a4a"/><rect x="462" width="20" height="18" fill="#1a3a4a"/><rect x="484" width="20" height="18" fill="#1a3a4a"/><rect x="506" width="20" height="18" fill="#1a3a4a"/>
+        </g>
+        <g transform="translate(0,120)">
+          <rect width="20" height="18" fill="#1a3a4a"/><rect x="22" width="20" height="18" fill="#214d5d"/><rect x="44" width="20" height="18" fill="#3d7b8b"/><rect x="66" width="20" height="18" fill="#5d9bb0"/><rect x="88" width="20" height="18" fill="#83bccf"/><rect x="110" width="20" height="18" fill="#a8d6e3"/><rect x="132" width="20" height="18" fill="#f2c46d"/><rect x="154" width="20" height="18" fill="#83bccf"/><rect x="176" width="20" height="18" fill="#5d9bb0"/><rect x="198" width="20" height="18" fill="#3d7b8b"/><rect x="220" width="20" height="18" fill="#214d5d"/><rect x="242" width="20" height="18" fill="#1a3a4a"/><rect x="264" width="20" height="18" fill="#1a3a4a"/><rect x="286" width="20" height="18" fill="#1a3a4a"/><rect x="308" width="20" height="18" fill="#1a3a4a"/><rect x="330" width="20" height="18" fill="#1a3a4a"/><rect x="352" width="20" height="18" fill="#1a3a4a"/><rect x="374" width="20" height="18" fill="#214d5d"/><rect x="396" width="20" height="18" fill="#214d5d"/><rect x="418" width="20" height="18" fill="#3d7b8b"/><rect x="440" width="20" height="18" fill="#3d7b8b"/><rect x="462" width="20" height="18" fill="#214d5d"/><rect x="484" width="20" height="18" fill="#1a3a4a"/><rect x="506" width="20" height="18" fill="#1a3a4a"/>
+        </g>
+        <g transform="translate(0,148)">
+          <rect width="20" height="18" fill="#1a3a4a"/><rect x="22" width="20" height="18" fill="#1a3a4a"/><rect x="44" width="20" height="18" fill="#214d5d"/><rect x="66" width="20" height="18" fill="#214d5d"/><rect x="88" width="20" height="18" fill="#3d7b8b"/><rect x="110" width="20" height="18" fill="#5d9bb0"/><rect x="132" width="20" height="18" fill="#5d9bb0"/><rect x="154" width="20" height="18" fill="#3d7b8b"/><rect x="176" width="20" height="18" fill="#3d7b8b"/><rect x="198" width="20" height="18" fill="#214d5d"/><rect x="220" width="20" height="18" fill="#214d5d"/><rect x="242" width="20" height="18" fill="#1a3a4a"/><rect x="264" width="20" height="18" fill="#1a3a4a"/><rect x="286" width="20" height="18" fill="#1a3a4a"/><rect x="308" width="20" height="18" fill="#1a3a4a"/><rect x="330" width="20" height="18" fill="#1a3a4a"/><rect x="352" width="20" height="18" fill="#1a3a4a"/><rect x="374" width="20" height="18" fill="#1a3a4a"/><rect x="396" width="20" height="18" fill="#1a3a4a"/><rect x="418" width="20" height="18" fill="#1a3a4a"/><rect x="440" width="20" height="18" fill="#1a3a4a"/><rect x="462" width="20" height="18" fill="#1a3a4a"/><rect x="484" width="20" height="18" fill="#1a3a4a"/><rect x="506" width="20" height="18" fill="#1a3a4a"/>
+        </g>
+      </g>
+      <!-- hour labels -->
+      <text x="0"   y="194" class="axis">00</text>
+      <text x="132" y="194" class="axis">06</text>
+      <text x="264" y="194" class="axis">12</text>
+      <text x="396" y="194" class="axis">18</text>
+      <text x="500" y="194" class="axis">23</text>
+    </g>
+  </g>
+
+  <!-- MITRE coverage -->
+  <g transform="translate(640,448)">
+    <rect width="620" height="240" class="panel"/>
+    <text x="18" y="28" class="h2">MITRE ATT&amp;CK COVERAGE · LLM TECHNIQUES</text>
+
+    <g transform="translate(20,52)" font-size="11">
+      <g>
+        <rect width="92" height="40" fill="#e7664c" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1059</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">182 alerts</text>
+      </g>
+      <g transform="translate(100,0)">
+        <rect width="92" height="40" fill="#bd271e" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1027</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">87</text>
+      </g>
+      <g transform="translate(200,0)">
+        <rect width="92" height="40" fill="#d6bf57" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#1a1c21" font-weight="700" text-anchor="middle">T1552</text>
+        <text x="46" y="32" class="lbl" fill="#1a1c21" text-anchor="middle">38</text>
+      </g>
+      <g transform="translate(300,0)">
+        <rect width="92" height="40" fill="#bd271e" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1041</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">14</text>
+      </g>
+      <g transform="translate(400,0)">
+        <rect width="92" height="40" fill="#54b399" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1566</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">22</text>
+      </g>
+      <g transform="translate(500,0)">
+        <rect width="92" height="40" fill="#6092c0" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1499</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">7</text>
+      </g>
+
+      <g transform="translate(0,52)">
+        <rect width="92" height="40" fill="#9170b8" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1190</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">4</text>
+      </g>
+      <g transform="translate(100,52)">
+        <rect width="92" height="40" fill="#54b399" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#fff" font-weight="700" text-anchor="middle">T1078</text>
+        <text x="46" y="32" class="lbl" fill="#fff" text-anchor="middle">3</text>
+      </g>
+      <g transform="translate(200,52)">
+        <rect width="92" height="40" fill="#343a44" stroke="#5a6373" stroke-dasharray="3 2" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#8a94a7" font-weight="700" text-anchor="middle">T1195</text>
+        <text x="46" y="32" class="lbl" fill="#8a94a7" text-anchor="middle">0</text>
+      </g>
+      <g transform="translate(300,52)">
+        <rect width="92" height="40" fill="#343a44" stroke="#5a6373" stroke-dasharray="3 2" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#8a94a7" font-weight="700" text-anchor="middle">T1204</text>
+        <text x="46" y="32" class="lbl" fill="#8a94a7" text-anchor="middle">0</text>
+      </g>
+      <g transform="translate(400,52)">
+        <rect width="92" height="40" fill="#343a44" stroke="#5a6373" stroke-dasharray="3 2" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#8a94a7" font-weight="700" text-anchor="middle">T1048</text>
+        <text x="46" y="32" class="lbl" fill="#8a94a7" text-anchor="middle">0</text>
+      </g>
+      <g transform="translate(500,52)">
+        <rect width="92" height="40" fill="#343a44" stroke="#5a6373" stroke-dasharray="3 2" rx="3"/>
+        <text x="46" y="18" class="lbl" fill="#8a94a7" font-weight="700" text-anchor="middle">T1567</text>
+        <text x="46" y="32" class="lbl" fill="#8a94a7" text-anchor="middle">0</text>
+      </g>
+
+      <text y="124" class="lbl">Legend:</text>
+      <rect x="56" y="113" width="14" height="14" fill="#bd271e" rx="2"/>
+      <text x="76" y="124" class="lbl">critical</text>
+      <rect x="120" y="113" width="14" height="14" fill="#e7664c" rx="2"/>
+      <text x="140" y="124" class="lbl">high</text>
+      <rect x="178" y="113" width="14" height="14" fill="#d6bf57" rx="2"/>
+      <text x="198" y="124" class="lbl">medium</text>
+      <rect x="246" y="113" width="14" height="14" fill="#54b399" rx="2"/>
+      <text x="266" y="124" class="lbl">low</text>
+      <rect x="298" y="113" width="14" height="14" fill="#343a44" stroke="#5a6373" stroke-dasharray="3 2" rx="2"/>
+      <text x="318" y="124" class="lbl">no coverage</text>
+
+      <text y="160" class="mut" fill="#dbe4ee">Coverage: 8/13 techniques (61.5%) · 4 critical-severity active</text>
+      <text y="178" class="mut">Click any cell to drill into matching alerts.</text>
+    </g>
+  </g>
+
+  <!-- Footer -->
+  <text x="20" y="720" class="mut">Index pattern: promptshield-* | wazuh-alerts-* | zeek-llm-*</text>
+  <text x="20" y="740" class="mut">Showing 5 of 12 panels · Manage saved objects to import full bundle from dashboards/opensearch_dashboard.ndjson</text>
+</svg>

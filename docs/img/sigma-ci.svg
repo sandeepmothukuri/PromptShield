@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" font-family="-apple-system,Segoe UI,Inter,sans-serif">
+  <defs>
+    <style>
+      .bg{fill:#0d1117}
+      .top{fill:#161b22;stroke:#30363d;stroke-width:1}
+      .panel{fill:#161b22;stroke:#30363d;stroke-width:1;rx:6}
+      .pill{fill:#1f6feb;rx:12}
+      .pillG{fill:#238636;rx:12}
+      .h1{fill:#e6edf3;font-size:18px;font-weight:600}
+      .h2{fill:#e6edf3;font-size:14px;font-weight:600}
+      .lbl{fill:#7d8590;font-size:12px}
+      .mut{fill:#7d8590;font-size:11px}
+      .val{fill:#e6edf3;font-size:13px}
+      .ok{fill:#3fb950}
+      .pend{fill:#d29922}
+      .row{fill:#0d1117;stroke:#30363d;stroke-width:1}
+      .mono{font-family:Menlo,Consolas,monospace;font-size:12px;fill:#c9d1d9}
+      .green{fill:#3fb950}
+      .blue{fill:#58a6ff}
+      .red{fill:#f85149}
+      .yel{fill:#d29922}
+    </style>
+  </defs>
+  <rect width="1280" height="800" class="bg"/>
+
+  <!-- Top bar -->
+  <rect x="0" y="0" width="1280" height="56" class="top"/>
+  <text x="22" y="36" class="h1">⌥ sandeepmothukuri / PromptShield-Lab</text>
+  <rect x="380" y="22" width="60" height="22" class="pill"/>
+  <text x="392" y="38" class="val" font-size="11" font-weight="600" fill="#fff">Public</text>
+  <text x="1100" y="36" class="h2">★ 1.4k    ⑂ 287    👁 92</text>
+
+  <!-- Tabs -->
+  <text x="22" y="84" class="lbl">Code</text>
+  <text x="78" y="84" class="lbl">Issues 12</text>
+  <text x="160" y="84" class="lbl">Pull requests 3</text>
+  <text x="270" y="84" class="val" font-weight="600">▸ Actions</text>
+  <text x="346" y="84" class="lbl">Projects</text>
+  <text x="410" y="84" class="lbl">Security</text>
+  <text x="478" y="84" class="lbl">Insights</text>
+  <line x1="0" y1="100" x2="1280" y2="100" stroke="#30363d"/>
+
+  <!-- Workflow header -->
+  <text x="22" y="138" class="h1">CI</text>
+  <text x="22" y="160" class="lbl">.github/workflows/ci.yml · on: push, pull_request</text>
+
+  <!-- Run summary card -->
+  <rect x="22" y="180" width="1236" height="120" class="panel"/>
+  <circle cx="60" cy="220" r="14" class="ok"/>
+  <text x="54" y="226" fill="#fff" font-size="18" font-weight="700">✓</text>
+  <text x="92" y="216" class="h2">feat(detections): add Sigma rule for indirect injection</text>
+  <text x="92" y="236" class="mut">#247 · main · 4f8c2a1 · Sandeep Mothukuri merged 14 minutes ago</text>
+  <text x="92" y="270" class="lbl">Triggered via push · ubuntu-latest · 1m 42s</text>
+
+  <rect x="1080" y="200" width="160" height="32" class="pillG"/>
+  <text x="1118" y="221" class="val" font-weight="700" fill="#fff">✓ Success</text>
+
+  <text x="1080" y="262" class="mut">commit 4f8c2a1</text>
+  <text x="1080" y="280" class="mut">main · 2 min ago</text>
+
+  <!-- Jobs list -->
+  <text x="22" y="332" class="h2">Jobs</text>
+
+  <!-- Job 1 -->
+  <rect x="22" y="346" width="600" height="58" class="panel"/>
+  <circle cx="46" cy="375" r="10" class="ok"/>
+  <text x="42" y="380" fill="#fff" font-size="13" font-weight="700">✓</text>
+  <text x="72" y="370" class="h2">lint-python</text>
+  <text x="72" y="390" class="mut">ruff check . · 14s</text>
+  <text x="540" y="380" class="val mono">14s</text>
+
+  <!-- Job 2 -->
+  <rect x="22" y="412" width="600" height="58" class="panel"/>
+  <circle cx="46" cy="441" r="10" class="ok"/>
+  <text x="42" y="446" fill="#fff" font-size="13" font-weight="700">✓</text>
+  <text x="72" y="436" class="h2">validate-sigma</text>
+  <text x="72" y="456" class="mut">sigma check detections/sigma · 7 rules valid</text>
+  <text x="540" y="446" class="val mono">22s</text>
+
+  <!-- Job 3 -->
+  <rect x="22" y="478" width="600" height="58" class="panel"/>
+  <circle cx="46" cy="507" r="10" class="ok"/>
+  <text x="42" y="512" fill="#fff" font-size="13" font-weight="700">✓</text>
+  <text x="72" y="502" class="h2">yaml-lint</text>
+  <text x="72" y="522" class="mut">ibiqlik/action-yamllint@v3 · 31 files OK</text>
+  <text x="540" y="512" class="val mono">11s</text>
+
+  <!-- Job 4 -->
+  <rect x="22" y="544" width="600" height="58" class="panel"/>
+  <circle cx="46" cy="573" r="10" class="ok"/>
+  <text x="42" y="578" fill="#fff" font-size="13" font-weight="700">✓</text>
+  <text x="72" y="568" class="h2">unit-tests</text>
+  <text x="72" y="588" class="mut">classifier + langchain_guard assertions · 8 passed</text>
+  <text x="540" y="578" class="val mono">18s</text>
+
+  <!-- Right panel: step log -->
+  <rect x="640" y="346" width="618" height="412" class="panel"/>
+  <text x="660" y="372" class="h2">validate-sigma · log</text>
+  <line x1="660" y1="384" x2="1238" y2="384" stroke="#30363d"/>
+
+  <g transform="translate(660,408)">
+    <text y="0"   class="mono"><tspan class="blue">▸</tspan> Set up job</text>
+    <text y="20"  class="mono"><tspan class="green">✓</tspan> Run actions/checkout@v4</text>
+    <text y="40"  class="mono"><tspan class="green">✓</tspan> Run actions/setup-python@v5 (3.11.10)</text>
+    <text y="60"  class="mono"><tspan class="green">✓</tspan> pip install sigma-cli pysigma pysigma-backend-opensearch</text>
+    <text y="80"  class="mono">      Installed: sigma-cli 1.0.4, pysigma 0.11.18</text>
+    <text y="106" class="mono"><tspan class="blue">▸</tspan> Run sigma check detections/sigma</text>
+    <text y="126" class="mono">    Checking 7 rules…</text>
+    <text y="148" class="mono">    <tspan class="green">PASS</tspan>  prompt_injection_basic.yml</text>
+    <text y="166" class="mono">    <tspan class="green">PASS</tspan>  llm_jailbreak_attempt.yml</text>
+    <text y="184" class="mono">    <tspan class="green">PASS</tspan>  data_exfiltration_via_llm.yml</text>
+    <text y="202" class="mono">    <tspan class="green">PASS</tspan>  ai_phishing_generation.yml</text>
+    <text y="220" class="mono">    <tspan class="green">PASS</tspan>  malicious_prompt_patterns.yml</text>
+    <text y="238" class="mono">    <tspan class="green">PASS</tspan>  system_prompt_leakage.yml</text>
+    <text y="256" class="mono">    <tspan class="green">PASS</tspan>  llm_token_flood_dos.yml</text>
+    <text y="282" class="mono">    Summary: <tspan class="green">7 valid</tspan>, 0 invalid, 0 warnings</text>
+    <text y="308" class="mono"><tspan class="blue">▸</tspan> Run sigma convert -t opensearch detections/sigma -o /tmp/converted.json</text>
+    <text y="328" class="mono">    7 rules converted → OpenSearch DSL</text>
+    <text y="354" class="mono"><tspan class="green">✓</tspan> Upload artifact: opensearch-queries (4.2 KB)</text>
+    <text y="374" class="mono"><tspan class="green">✓</tspan> Complete job · 22s</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="22" y="784" class="mut">Workflow runs:  Showing latest run for ci.yml  ·  All workflows passing  ·  Updated just now</text>
+</svg>

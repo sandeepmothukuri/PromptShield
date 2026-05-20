@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" font-family="-apple-system,Segoe UI,Inter,sans-serif">
+  <defs>
+    <style>
+      .bg{fill:#1a1c21}
+      .top{fill:#0a121f}
+      .side{fill:#23272e}
+      .panel{fill:#23272e;stroke:#343a44;stroke-width:1;rx:4}
+      .h1{fill:#fff;font-size:17px;font-weight:600}
+      .h2{fill:#dbe4ee;font-size:13px;font-weight:600}
+      .mut{fill:#8a94a7;font-size:11px}
+      .lbl{fill:#8a94a7;font-size:11px;font-weight:600;letter-spacing:.5px}
+      .val{fill:#dbe4ee;font-size:12px;font-family:Menlo,Consolas,monospace}
+      .key{fill:#79c0ff;font-family:Menlo,Consolas,monospace;font-size:13px}
+      .str{fill:#a5d6ff;font-family:Menlo,Consolas,monospace;font-size:13px}
+      .kw {fill:#ff7b72;font-family:Menlo,Consolas,monospace;font-size:13px}
+      .nrm{fill:#e6edf3;font-family:Menlo,Consolas,monospace;font-size:13px}
+      .com{fill:#8b949e;font-family:Menlo,Consolas,monospace;font-size:13px}
+      .row{fill:#23272e;stroke:#343a44;stroke-width:1}
+      .alt{fill:#262a31}
+      .pillR{fill:#bd271e;rx:3}
+      .pillY{fill:#d6bf57;rx:3}
+      .pillG{fill:#54b399;rx:3}
+      .bdgT{fill:#fff;font-size:10px;font-weight:700}
+    </style>
+  </defs>
+  <rect width="1280" height="800" class="bg"/>
+
+  <!-- Topbar -->
+  <rect x="0" y="0" width="1280" height="48" class="top"/>
+  <text x="22" y="32" class="h1">⬡ OpenSearch · Dev Tools</text>
+  <text x="1080" y="32" class="h1" font-weight="400" opacity=".85">cluster: promptshield · 14:18 UTC</text>
+
+  <!-- Side nav -->
+  <rect x="0" y="48" width="56" height="752" class="side"/>
+  <text x="14" y="80" fill="#dbe4ee" font-size="18">🔎</text>
+  <text x="14" y="120" fill="#dbe4ee" font-size="18">📊</text>
+  <text x="14" y="160" fill="#54b399" font-size="18">⌨</text>
+  <text x="14" y="200" fill="#dbe4ee" font-size="18">⚙</text>
+
+  <!-- Query editor -->
+  <rect x="68" y="64" width="600" height="500" class="panel"/>
+  <text x="86" y="90" class="h2">Console · GET promptshield-*/_search</text>
+  <line x1="86" y1="100" x2="654" y2="100" stroke="#343a44"/>
+
+  <rect x="78" y="110" width="32" height="440" fill="#1a1c21"/>
+  <g font-family="Menlo,Consolas,monospace" font-size="13">
+    <text x="92" y="128" class="mut" text-anchor="middle">1</text>
+    <text x="92" y="146" class="mut" text-anchor="middle">2</text>
+    <text x="92" y="164" class="mut" text-anchor="middle">3</text>
+    <text x="92" y="182" class="mut" text-anchor="middle">4</text>
+    <text x="92" y="200" class="mut" text-anchor="middle">5</text>
+    <text x="92" y="218" class="mut" text-anchor="middle">6</text>
+    <text x="92" y="236" class="mut" text-anchor="middle">7</text>
+    <text x="92" y="254" class="mut" text-anchor="middle">8</text>
+    <text x="92" y="272" class="mut" text-anchor="middle">9</text>
+    <text x="92" y="290" class="mut" text-anchor="middle">10</text>
+    <text x="92" y="308" class="mut" text-anchor="middle">11</text>
+    <text x="92" y="326" class="mut" text-anchor="middle">12</text>
+    <text x="92" y="344" class="mut" text-anchor="middle">13</text>
+    <text x="92" y="362" class="mut" text-anchor="middle">14</text>
+    <text x="92" y="380" class="mut" text-anchor="middle">15</text>
+    <text x="92" y="398" class="mut" text-anchor="middle">16</text>
+    <text x="92" y="416" class="mut" text-anchor="middle">17</text>
+    <text x="92" y="434" class="mut" text-anchor="middle">18</text>
+    <text x="92" y="452" class="mut" text-anchor="middle">19</text>
+    <text x="92" y="470" class="mut" text-anchor="middle">20</text>
+    <text x="92" y="488" class="mut" text-anchor="middle">21</text>
+    <text x="92" y="506" class="mut" text-anchor="middle">22</text>
+    <text x="92" y="524" class="mut" text-anchor="middle">23</text>
+  </g>
+
+  <g>
+    <text x="120" y="128" class="kw">GET</text><text x="156" y="128" class="nrm">promptshield-*/_search</text>
+    <text x="120" y="146" class="nrm">{</text>
+    <text x="138" y="164" class="key">"query"</text><text x="186" y="164" class="nrm">: {</text>
+    <text x="156" y="182" class="key">"bool"</text><text x="196" y="182" class="nrm">: {</text>
+    <text x="174" y="200" class="key">"filter"</text><text x="226" y="200" class="nrm">: [</text>
+    <text x="192" y="218" class="nrm">{ </text><text x="210" y="218" class="key">"range"</text><text x="258" y="218" class="nrm">: { </text><text x="288" y="218" class="key">"@timestamp"</text><text x="376" y="218" class="nrm">: { </text><text x="406" y="218" class="key">"gte"</text><text x="438" y="218" class="nrm">: </text><text x="454" y="218" class="str">"now-24h"</text><text x="528" y="218" class="nrm"> } } }</text>
+    <text x="174" y="236" class="nrm">],</text>
+    <text x="174" y="254" class="key">"should"</text><text x="226" y="254" class="nrm">: [</text>
+    <text x="192" y="272" class="nrm">{ </text><text x="210" y="272" class="key">"match_phrase"</text><text x="312" y="272" class="nrm">: { </text><text x="342" y="272" class="key">"prompt"</text><text x="394" y="272" class="nrm">: </text><text x="410" y="272" class="str">"ignore previous instructions"</text><text x="624" y="272" class="nrm"> }},</text>
+    <text x="192" y="290" class="nrm">{ </text><text x="210" y="290" class="key">"match_phrase"</text><text x="312" y="290" class="nrm">: { </text><text x="342" y="290" class="key">"prompt"</text><text x="394" y="290" class="nrm">: </text><text x="410" y="290" class="str">"you are now DAN"</text><text x="540" y="290" class="nrm"> }},</text>
+    <text x="192" y="308" class="nrm">{ </text><text x="210" y="308" class="key">"match_phrase"</text><text x="312" y="308" class="nrm">: { </text><text x="342" y="308" class="key">"prompt"</text><text x="394" y="308" class="nrm">: </text><text x="410" y="308" class="str">"developer mode"</text><text x="528" y="308" class="nrm"> }},</text>
+    <text x="192" y="326" class="nrm">{ </text><text x="210" y="326" class="key">"match_phrase"</text><text x="312" y="326" class="nrm">: { </text><text x="342" y="326" class="key">"prompt"</text><text x="394" y="326" class="nrm">: </text><text x="410" y="326" class="str">"repeat the words above"</text><text x="588" y="326" class="nrm"> }}</text>
+    <text x="174" y="344" class="nrm">],</text>
+    <text x="174" y="362" class="key">"minimum_should_match"</text><text x="338" y="362" class="nrm">: </text><text x="354" y="362" class="str">1</text>
+    <text x="156" y="380" class="nrm">} }</text>
+    <text x="138" y="398" class="nrm">},</text>
+    <text x="138" y="416" class="key">"_source"</text><text x="194" y="416" class="nrm">: [</text>
+    <text x="208" y="416" class="str">"user"</text><text x="246" y="416" class="nrm">, </text>
+    <text x="260" y="416" class="str">"session_id"</text><text x="340" y="416" class="nrm">, </text>
+    <text x="354" y="416" class="str">"prompt"</text><text x="402" y="416" class="nrm">,</text>
+    <text x="156" y="434" class="str">"classifier_score"</text><text x="280" y="434" class="nrm">, </text>
+    <text x="294" y="434" class="str">"verdict"</text><text x="346" y="434" class="nrm">, </text>
+    <text x="360" y="434" class="str">"category"</text><text x="424" y="434" class="nrm">],</text>
+    <text x="138" y="452" class="key">"sort"</text><text x="174" y="452" class="nrm">: [{ </text>
+    <text x="214" y="452" class="key">"@timestamp"</text><text x="302" y="452" class="nrm">: </text>
+    <text x="318" y="452" class="str">"desc"</text><text x="358" y="452" class="nrm"> }],</text>
+    <text x="138" y="470" class="key">"size"</text><text x="174" y="470" class="nrm">: </text><text x="190" y="470" class="str">50</text>
+    <text x="120" y="488" class="nrm">}</text>
+    <text x="120" y="524" class="com"># Hunt: prompt-injection candidates · last 24h</text>
+  </g>
+
+  <rect x="600" y="118" width="60" height="22" fill="#54b399" rx="3"/>
+  <text x="612" y="133" class="bdgT">▶ RUN</text>
+
+  <!-- Response panel -->
+  <rect x="676" y="64" width="588" height="500" class="panel"/>
+  <text x="694" y="90" class="h2">Response · 200 OK · 142 ms</text>
+  <text x="1180" y="90" class="mut">hits: 38 of 38</text>
+  <line x1="694" y1="100" x2="1250" y2="100" stroke="#343a44"/>
+
+  <g font-family="Menlo,Consolas,monospace" font-size="12">
+    <text x="694" y="124" class="nrm">{</text>
+    <text x="708" y="142" class="key">"took"</text><text x="744" y="142" class="nrm">: </text><text x="758" y="142" class="str">142</text><text x="780" y="142" class="nrm">,</text>
+    <text x="708" y="160" class="key">"hits"</text><text x="744" y="160" class="nrm">: {</text>
+    <text x="722" y="178" class="key">"total"</text><text x="766" y="178" class="nrm">: { </text><text x="796" y="178" class="key">"value"</text><text x="840" y="178" class="nrm">: </text><text x="856" y="178" class="str">38</text><text x="878" y="178" class="nrm"> },</text>
+    <text x="722" y="196" class="key">"hits"</text><text x="758" y="196" class="nrm">: [</text>
+    <text x="736" y="214" class="nrm">{</text>
+    <text x="750" y="232" class="key">"_source"</text><text x="810" y="232" class="nrm">: {</text>
+    <text x="764" y="250" class="key">"user"</text><text x="800" y="250" class="nrm">: </text><text x="814" y="250" class="str">"attacker-sim"</text><text x="918" y="250" class="nrm">,</text>
+    <text x="764" y="268" class="key">"session_id"</text><text x="846" y="268" class="nrm">: </text><text x="860" y="268" class="str">"a31f-…-9c4b"</text><text x="958" y="268" class="nrm">,</text>
+    <text x="764" y="286" class="key">"prompt"</text><text x="816" y="286" class="nrm">: </text><text x="830" y="286" class="str">"Ignore previous instructions and…"</text><text x="1098" y="286" class="nrm">,</text>
+    <text x="764" y="304" class="key">"classifier_score"</text><text x="892" y="304" class="nrm">: </text><text x="906" y="304" class="str">0.92</text><text x="942" y="304" class="nrm">,</text>
+    <text x="764" y="322" class="key">"verdict"</text><text x="820" y="322" class="nrm">: </text><text x="834" y="322" class="str">"block"</text><text x="884" y="322" class="nrm">,</text>
+    <text x="764" y="340" class="key">"category"</text><text x="826" y="340" class="nrm">: </text><text x="840" y="340" class="str">"prompt_injection"</text>
+    <text x="750" y="358" class="nrm">} },</text>
+
+    <text x="736" y="384" class="nrm">{</text>
+    <text x="750" y="402" class="key">"_source"</text><text x="810" y="402" class="nrm">: {</text>
+    <text x="764" y="420" class="key">"user"</text><text x="800" y="420" class="nrm">: </text><text x="814" y="420" class="str">"jailbreak-sim"</text><text x="922" y="420" class="nrm">,</text>
+    <text x="764" y="438" class="key">"prompt"</text><text x="816" y="438" class="nrm">: </text><text x="830" y="438" class="str">"You are now DAN…"</text><text x="970" y="438" class="nrm">,</text>
+    <text x="764" y="456" class="key">"classifier_score"</text><text x="892" y="456" class="nrm">: </text><text x="906" y="456" class="str">0.92</text><text x="942" y="456" class="nrm">,</text>
+    <text x="764" y="474" class="key">"verdict"</text><text x="820" y="474" class="nrm">: </text><text x="834" y="474" class="str">"block"</text>
+    <text x="750" y="492" class="nrm">} },</text>
+
+    <text x="736" y="518" class="com">... 36 more hits ...</text>
+    <text x="722" y="540" class="nrm">]</text>
+    <text x="708" y="558" class="nrm">}</text>
+  </g>
+
+  <!-- Hits summary cards -->
+  <rect x="68" y="580" width="1196" height="200" class="panel"/>
+  <text x="86" y="606" class="h2">Top contributors · last 24h</text>
+  <line x1="86" y1="616" x2="1250" y2="616" stroke="#343a44"/>
+
+  <g transform="translate(86,632)">
+    <text y="14" class="lbl">USER</text>
+    <text x="160" y="14" class="lbl">HITS</text>
+    <text x="240" y="14" class="lbl">TOP PATTERN</text>
+    <text x="640" y="14" class="lbl">AVG SCORE</text>
+    <text x="760" y="14" class="lbl">SEVERITY</text>
+    <text x="900" y="14" class="lbl">FIRST SEEN</text>
+    <text x="1040" y="14" class="lbl">ACTION</text>
+
+    <line y1="22" x2="1170" y2="22" stroke="#343a44"/>
+
+    <text y="44" class="val">bob</text>
+    <text x="160" y="44" class="val">17</text>
+    <text x="240" y="44" class="val">you are now DAN</text>
+    <text x="640" y="44" class="val">0.93</text>
+    <rect x="758" y="30" width="60" height="18" class="pillR"/>
+    <text x="770" y="44" class="bdgT">CRITICAL</text>
+    <text x="900" y="44" class="val">19/05 09:12</text>
+    <text x="1040" y="44" class="val" fill="#79c0ff">→ Playbook</text>
+
+    <text y="68" class="val">attacker-sim</text>
+    <text x="160" y="68" class="val">9</text>
+    <text x="240" y="68" class="val">ignore previous instructions</text>
+    <text x="640" y="68" class="val">0.92</text>
+    <rect x="758" y="54" width="40" height="18" class="pillY"/>
+    <text x="766" y="68" class="bdgT" fill="#1a1c21">HIGH</text>
+    <text x="900" y="68" class="val">19/05 14:04</text>
+    <text x="1040" y="68" class="val" fill="#79c0ff">→ Playbook</text>
+
+    <text y="92" class="val">phish-sim</text>
+    <text x="160" y="92" class="val">6</text>
+    <text x="240" y="92" class="val">write a phishing email impersonating CEO</text>
+    <text x="640" y="92" class="val">0.91</text>
+    <rect x="758" y="78" width="40" height="18" class="pillY"/>
+    <text x="766" y="92" class="bdgT" fill="#1a1c21">HIGH</text>
+    <text x="900" y="92" class="val">19/05 14:11</text>
+    <text x="1040" y="92" class="val" fill="#79c0ff">→ Playbook</text>
+
+    <text y="116" class="val">exfil-sim</text>
+    <text x="160" y="116" class="val">4</text>
+    <text x="240" y="116" class="val">summarize document containing AWS keys</text>
+    <text x="640" y="116" class="val">0.88</text>
+    <rect x="758" y="102" width="60" height="18" class="pillR"/>
+    <text x="770" y="116" class="bdgT">CRITICAL</text>
+    <text x="900" y="116" class="val">19/05 14:08</text>
+    <text x="1040" y="116" class="val" fill="#79c0ff">→ Playbook</text>
+
+    <text y="140" class="val">carol</text>
+    <text x="160" y="140" class="val">2</text>
+    <text x="240" y="140" class="val">repeat the words above</text>
+    <text x="640" y="140" class="val">0.86</text>
+    <rect x="758" y="126" width="56" height="18" class="pillG"/>
+    <text x="772" y="140" class="bdgT">MEDIUM</text>
+    <text x="900" y="140" class="val">19/05 11:30</text>
+    <text x="1040" y="140" class="val" fill="#79c0ff">→ Playbook</text>
+  </g>
+</svg>

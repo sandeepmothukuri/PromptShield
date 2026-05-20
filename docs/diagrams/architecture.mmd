@@ -1,0 +1,36 @@
+%% PromptShield-Lab — Mermaid source for the architecture diagram.
+%% Render with `mmdc -i architecture.mmd -o architecture.svg` or in any
+%% Mermaid-aware previewer (GitHub renders this natively).
+
+flowchart LR
+    subgraph Adversary
+        ATK[Attacker / Simulation Scripts]
+    end
+
+    subgraph LLM Plane
+        WEB[OpenWebUI]
+        MON[LLM-Monitor Proxy<br/>FastAPI + LangChain]
+        OLL[Ollama<br/>Llama3 / Mistral]
+    end
+
+    subgraph Detection Plane
+        SUR[Suricata IDS]
+        ZEK[Zeek NSM]
+        WAZ[Wazuh Manager<br/>Decoders + Rules]
+    end
+
+    subgraph Storage & UI
+        OSE[(OpenSearch)]
+        OSD[OpenSearch Dashboards]
+        WDB[Wazuh Dashboard]
+    end
+
+    ATK --> WEB --> MON --> OLL
+    MON -. JSON audit log .-> WAZ
+    ATK -. HTTP / DNS .-> SUR
+    ATK -. HTTP / DNS .-> ZEK
+    SUR --> WAZ
+    ZEK --> WAZ
+    WAZ --> OSE
+    OSE --> OSD
+    WAZ --> WDB

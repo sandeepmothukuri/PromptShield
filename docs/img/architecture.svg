@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" font-family="-apple-system,Segoe UI,Inter,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#161b22"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7ee787"/>
+    </marker>
+    <style>
+      .box{fill:#21262d;stroke:#30363d;stroke-width:1.5;rx:8}
+      .lbl{fill:#c9d1d9;font-size:14px;font-weight:600}
+      .sub{fill:#8b949e;font-size:11px}
+      .pill{fill:#1f6feb;rx:10}
+      .danger{fill:#f85149}
+      .ok{fill:#3fb950}
+      .ln{stroke:#7ee787;stroke-width:1.5;fill:none;stroke-dasharray:0}
+      .ttl{fill:#e6edf3;font-size:22px;font-weight:700}
+      .sec{fill:#58a6ff;font-size:13px;font-weight:600;letter-spacing:1px}
+    </style>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <text x="40" y="46" class="ttl">PromptShield-Lab · Reference Architecture</text>
+  <text x="40" y="70" class="sub">Detect • Hunt • Respond to LLM-era threats with an open-source SOC stack</text>
+
+  <!-- Adversary -->
+  <text x="60" y="115" class="sec">ADVERSARY</text>
+  <rect class="box" x="40" y="130" width="200" height="80"/>
+  <circle cx="78" cy="170" r="14" class="danger"/>
+  <text x="105" y="165" class="lbl">Attacker</text>
+  <text x="105" y="183" class="sub">simulations/*.py</text>
+
+  <!-- LLM plane -->
+  <text x="320" y="115" class="sec">LLM PLANE</text>
+  <rect class="box" x="300" y="130" width="180" height="80"/>
+  <text x="320" y="160" class="lbl">OpenWebUI</text>
+  <text x="320" y="180" class="sub">chat front-end</text>
+  <text x="320" y="196" class="sub">:3000</text>
+
+  <rect class="box" x="510" y="130" width="220" height="80"/>
+  <text x="528" y="158" class="lbl">LLM-Monitor Proxy</text>
+  <text x="528" y="176" class="sub">FastAPI · classifier</text>
+  <text x="528" y="192" class="sub">LangChain guardrails · :8080</text>
+
+  <rect class="box" x="760" y="130" width="170" height="80"/>
+  <text x="780" y="160" class="lbl">Ollama</text>
+  <text x="780" y="180" class="sub">Llama 3 / Mistral</text>
+  <text x="780" y="196" class="sub">:11434</text>
+
+  <!-- Detection plane -->
+  <text x="60" y="275" class="sec">DETECTION PLANE</text>
+  <rect class="box" x="40" y="290" width="200" height="100"/>
+  <text x="60" y="318" class="lbl">Suricata</text>
+  <text x="60" y="338" class="sub">IDS · eve.json</text>
+  <text x="60" y="356" class="sub">9000001-9000006</text>
+
+  <rect class="box" x="260" y="290" width="200" height="100"/>
+  <text x="280" y="318" class="lbl">Zeek</text>
+  <text x="280" y="338" class="sub">NSM · conn / http</text>
+  <text x="280" y="356" class="sub">llm_telemetry.zeek</text>
+
+  <rect class="box" x="480" y="290" width="260" height="100"/>
+  <text x="500" y="318" class="lbl">Wazuh Manager</text>
+  <text x="500" y="338" class="sub">JSON decoders · MITRE rules</text>
+  <text x="500" y="356" class="sub">100100-100160 · :1514</text>
+
+  <rect class="box" x="760" y="290" width="200" height="100"/>
+  <text x="780" y="318" class="lbl">Atomic Red Team</text>
+  <text x="780" y="338" class="sub">T1059 · T1041 · T1566</text>
+
+  <!-- Storage / UI -->
+  <text x="60" y="450" class="sec">STORAGE · DASHBOARDS</text>
+  <rect class="box" x="40" y="465" width="280" height="120"/>
+  <text x="60" y="495" class="lbl">OpenSearch</text>
+  <text x="60" y="515" class="sub">promptshield-* · zeek-llm-* · wazuh-alerts-*</text>
+  <text x="60" y="535" class="sub">:9200</text>
+
+  <rect class="box" x="340" y="465" width="280" height="120"/>
+  <text x="360" y="495" class="lbl">OpenSearch Dashboards</text>
+  <text x="360" y="515" class="sub">injection trends · jailbreak heatmap</text>
+  <text x="360" y="535" class="sub">MITRE ATT&amp;CK coverage · :5602</text>
+
+  <rect class="box" x="640" y="465" width="280" height="120"/>
+  <text x="660" y="495" class="lbl">Wazuh Dashboard</text>
+  <text x="660" y="515" class="sub">alerts · rule context · MITRE tags</text>
+  <text x="660" y="535" class="sub">:5601</text>
+
+  <rect class="box" x="940" y="465" width="280" height="120"/>
+  <text x="960" y="495" class="lbl">SOC Analyst</text>
+  <text x="960" y="515" class="sub">playbooks/ · hunting/</text>
+  <text x="960" y="535" class="sub">IR · triage · postmortem</text>
+
+  <!-- Arrows -->
+  <path class="ln" d="M240 170 L300 170" marker-end="url(#arrow)"/>
+  <path class="ln" d="M480 170 L510 170" marker-end="url(#arrow)"/>
+  <path class="ln" d="M730 170 L760 170" marker-end="url(#arrow)"/>
+  <path class="ln" d="M620 210 L620 290" marker-end="url(#arrow)"/>
+  <path class="ln" d="M140 210 L140 290" marker-end="url(#arrow)"/>
+  <path class="ln" d="M360 210 L360 290" marker-end="url(#arrow)"/>
+  <path class="ln" d="M240 340 L480 340" marker-end="url(#arrow)"/>
+  <path class="ln" d="M460 340 L480 340" marker-end="url(#arrow)"/>
+  <path class="ln" d="M610 390 L180 465" marker-end="url(#arrow)"/>
+  <path class="ln" d="M610 390 L460 465" marker-end="url(#arrow)"/>
+  <path class="ln" d="M610 390 L760 465" marker-end="url(#arrow)"/>
+  <path class="ln" d="M920 525 L940 525" marker-end="url(#arrow)"/>
+
+  <text x="40" y="615" class="sub">© PromptShield-Lab · MIT · github.com/sandeepmothukuri/PromptShield-Lab</text>
+</svg>

@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 700" font-family="Menlo,Consolas,Monaco,monospace">
+  <defs>
+    <style>
+      .term{fill:#0c0f12}
+      .bar{fill:#1a1f25}
+      .ttl{fill:#e6edf3;font-size:13px;font-family:-apple-system,Segoe UI,sans-serif}
+      .green{fill:#7ee787}
+      .red{fill:#ff7b72}
+      .yel{fill:#e3b341}
+      .blu{fill:#79c0ff}
+      .gry{fill:#8b949e}
+      .mag{fill:#d2a8ff}
+      .wht{fill:#e6edf3}
+      .cyn{fill:#56d4dd}
+      .ora{fill:#ffa657}
+    </style>
+  </defs>
+  <rect width="1280" height="700" class="term"/>
+
+  <rect x="0" y="0" width="1280" height="32" class="bar"/>
+  <circle cx="18" cy="16" r="6" fill="#ff5f56"/>
+  <circle cx="38" cy="16" r="6" fill="#ffbd2e"/>
+  <circle cx="58" cy="16" r="6" fill="#27c93f"/>
+  <text x="540" y="20" class="ttl">soc@promptshield-lab · zeek -i eth0 + tail llm.log</text>
+
+  <g font-size="13">
+    <text x="20" y="62" class="green">soc@promptshield-lab</text><text x="190" y="62" class="wht">:</text><text x="200" y="62" class="blu">/usr/local/zeek/logs/current</text><text x="442" y="62" class="wht">$ ls -1</text>
+    <text x="20" y="84"  class="cyn">conn.log</text>
+    <text x="20" y="102" class="cyn">dns.log</text>
+    <text x="20" y="120" class="cyn">http.log</text>
+    <text x="20" y="138" class="cyn">ssl.log</text>
+    <text x="20" y="156" class="ora">llm.log    </text><text x="120" y="156" class="gry">  ← PromptShield custom log</text>
+    <text x="20" y="174" class="cyn">notice.log</text>
+    <text x="20" y="192" class="cyn">x509.log</text>
+
+    <text x="20" y="222" class="green">soc@promptshield-lab</text><text x="190" y="222" class="wht">:</text><text x="200" y="222" class="blu">…/logs/current</text><text x="320" y="222" class="wht">$ zeek-cut -d ts uid host method uri suspicious reason &lt; llm.log | head -20</text>
+
+    <!-- header -->
+    <text x="20" y="252" class="gry">#fields  ts                   uid                  host               method  uri              suspicious  reason</text>
+
+    <!-- rows -->
+    <text x="20" y="278" class="wht">2026-05-19T14:02:11Z </text>
+    <text x="218" y="278" class="yel">CHhAvVGS1DHFjwGM2  </text>
+    <text x="406" y="278" class="cyn">openwebui          </text>
+    <text x="556" y="278" class="mag">POST    </text>
+    <text x="628" y="278" class="wht">/chat            </text>
+    <text x="776" y="278" class="green">F           </text>
+    <text x="866" y="278" class="gry">-</text>
+
+    <text x="20" y="298" class="wht">2026-05-19T14:02:11Z </text>
+    <text x="218" y="298" class="yel">CtPZjk2bDgGdGgJqQ8 </text>
+    <text x="406" y="298" class="cyn">llm-monitor        </text>
+    <text x="556" y="298" class="mag">POST    </text>
+    <text x="628" y="298" class="wht">/api/generate    </text>
+    <text x="776" y="298" class="green">F           </text>
+    <text x="866" y="298" class="gry">-</text>
+
+    <text x="20" y="318" class="wht">2026-05-19T14:04:11Z </text>
+    <text x="218" y="318" class="yel">C9w0Gd49Qj3LpA1QPb </text>
+    <text x="406" y="318" class="cyn">llm-monitor        </text>
+    <text x="556" y="318" class="mag">POST    </text>
+    <text x="628" y="318" class="wht">/chat?q=ignore…  </text>
+    <text x="776" y="318" class="red">T           </text>
+    <text x="866" y="318" class="red">ignore previous instructions</text>
+
+    <text x="20" y="338" class="wht">2026-05-19T14:04:38Z </text>
+    <text x="218" y="338" class="yel">Cf3kKnNUR4kKDh2Ah  </text>
+    <text x="406" y="338" class="cyn">llm-monitor        </text>
+    <text x="556" y="338" class="mag">POST    </text>
+    <text x="628" y="338" class="wht">/chat            </text>
+    <text x="776" y="338" class="red">T           </text>
+    <text x="866" y="338" class="red">dan mode</text>
+
+    <text x="20" y="358" class="wht">2026-05-19T14:05:02Z </text>
+    <text x="218" y="358" class="yel">CqzVH7BLN9ay4Z8sCl </text>
+    <text x="406" y="358" class="cyn">openwebui          </text>
+    <text x="556" y="358" class="mag">POST    </text>
+    <text x="628" y="358" class="wht">/chat            </text>
+    <text x="776" y="358" class="green">F           </text>
+    <text x="866" y="358" class="gry">-</text>
+
+    <text x="20" y="378" class="wht">2026-05-19T14:06:44Z </text>
+    <text x="218" y="378" class="yel">CYP6Lk9bnD9Bsfm5Lc </text>
+    <text x="406" y="378" class="cyn">llm-monitor        </text>
+    <text x="556" y="378" class="mag">POST    </text>
+    <text x="628" y="378" class="wht">/chat            </text>
+    <text x="776" y="378" class="red">T           </text>
+    <text x="866" y="378" class="red">repeat the words above</text>
+
+    <text x="20" y="398" class="wht">2026-05-19T14:08:02Z </text>
+    <text x="218" y="398" class="yel">CmU2bAk9bbAr2Lz1z9 </text>
+    <text x="406" y="398" class="cyn">llm-monitor        </text>
+    <text x="556" y="398" class="mag">POST    </text>
+    <text x="628" y="398" class="wht">/chat            </text>
+    <text x="776" y="398" class="red">T           </text>
+    <text x="866" y="398" class="red">override your system prompt</text>
+
+    <text x="20" y="418" class="wht">2026-05-19T14:11:47Z </text>
+    <text x="218" y="418" class="yel">Cz1zzz4kbnH3sX8FAd </text>
+    <text x="406" y="418" class="cyn">openwebui          </text>
+    <text x="556" y="418" class="mag">POST    </text>
+    <text x="628" y="418" class="wht">/chat            </text>
+    <text x="776" y="418" class="green">F           </text>
+    <text x="866" y="418" class="gry">-</text>
+
+    <text x="20" y="438" class="wht">2026-05-19T14:14:09Z </text>
+    <text x="218" y="438" class="yel">CmlAzG3rJ8yvxsLpkx </text>
+    <text x="406" y="438" class="cyn">llm-monitor        </text>
+    <text x="556" y="438" class="mag">GET     </text>
+    <text x="628" y="438" class="wht">/healthz         </text>
+    <text x="776" y="438" class="green">F           </text>
+    <text x="866" y="438" class="gry">-</text>
+
+    <!-- aggregation -->
+    <text x="20" y="478" class="green">soc@promptshield-lab</text><text x="190" y="478" class="wht">:</text><text x="200" y="478" class="blu">…/logs/current</text><text x="320" y="478" class="wht">$ zeek-cut suspicious reason &lt; llm.log | sort | uniq -c | sort -nr</text>
+
+    <text x="40" y="508" class="yel">  248</text>
+    <text x="100" y="508" class="green">F</text>
+    <text x="120" y="508" class="gry">-</text>
+
+    <text x="40" y="528" class="yel">   12</text>
+    <text x="100" y="528" class="red">T</text>
+    <text x="120" y="528" class="red">ignore previous instructions</text>
+
+    <text x="40" y="548" class="yel">    7</text>
+    <text x="100" y="548" class="red">T</text>
+    <text x="120" y="548" class="red">dan mode</text>
+
+    <text x="40" y="568" class="yel">    4</text>
+    <text x="100" y="568" class="red">T</text>
+    <text x="120" y="568" class="red">repeat the words above</text>
+
+    <text x="40" y="588" class="yel">    3</text>
+    <text x="100" y="588" class="red">T</text>
+    <text x="120" y="588" class="red">override your system prompt</text>
+
+    <text x="40" y="608" class="yel">    2</text>
+    <text x="100" y="608" class="red">T</text>
+    <text x="120" y="608" class="red">developer mode enabled</text>
+
+    <text x="20" y="648" class="green">soc@promptshield-lab</text><text x="190" y="648" class="wht">:</text><text x="200" y="648" class="blu">…/logs/current</text><text x="320" y="648" class="wht">$ </text>
+    <rect x="334" y="634" width="9" height="18" fill="#e6edf3" opacity=".7">
+      <animate attributeName="opacity" values="0.7;0;0.7" dur="1s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>

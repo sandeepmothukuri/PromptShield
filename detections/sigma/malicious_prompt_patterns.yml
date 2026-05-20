@@ -1,0 +1,39 @@
+title: Malicious Prompt Pattern - Tool/Code Abuse
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a005
+status: experimental
+description: |
+  Detects prompts asking the LLM to produce offensive code, malware, or
+  attacker tooling. Complements the jailbreak rule by focusing on output
+  intent rather than the bypass technique.
+author: PromptShield-Lab
+date: 2026/01/15
+logsource:
+  product: promptshield
+  service: llm-monitor
+detection:
+  malware:
+    prompt|contains:
+      - 'write ransomware in'
+      - 'generate a reverse shell'
+      - 'powershell empire payload'
+      - 'metasploit module that'
+      - 'bypass EDR using'
+      - 'process hollowing example'
+  recon:
+    prompt|contains:
+      - 'enumerate active directory'
+      - 'kerberoast script'
+      - 'mimikatz alternative in'
+  condition: 1 of them
+fields:
+  - user
+  - session_id
+  - prompt
+falsepositives:
+  - Authorized offensive security training
+  - Academic research with IRB approval
+level: medium
+tags:
+  - attack.execution
+  - attack.t1204
+  - owasp.llm01

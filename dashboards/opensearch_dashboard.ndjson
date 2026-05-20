@@ -1,0 +1,4 @@
+{"attributes":{"title":"PromptShield - Overview","hits":0,"description":"AI security overview","panelsJSON":"[]","optionsJSON":"{\"useMargins\":true}","version":1,"timeRestore":false,"kibanaSavedObjectMeta":{"searchSourceJSON":"{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"}},"id":"promptshield-overview","references":[],"type":"dashboard","version":"1"}
+{"attributes":{"title":"promptshield-*","timeFieldName":"@timestamp","fields":"[]"},"id":"index-promptshield","references":[],"type":"index-pattern","version":"1"}
+{"attributes":{"title":"wazuh-alerts-*","timeFieldName":"@timestamp","fields":"[]"},"id":"index-wazuh","references":[],"type":"index-pattern","version":"1"}
+{"attributes":{"title":"zeek-llm-*","timeFieldName":"@timestamp","fields":"[]"},"id":"index-zeek-llm","references":[],"type":"index-pattern","version":"1"}
