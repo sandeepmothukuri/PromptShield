@@ -1,0 +1,12 @@
+# Generates the TLS certificates required by the Wazuh indexer, manager, and
+# dashboard. Run once before the first `docker compose up -d`:
+#
+#   docker compose -f config/generate-indexer-certs.yml run --rm generator
+#
+services:
+  generator:
+    image: wazuh/wazuh-certs-generator:0.0.2
+    hostname: wazuh-certs-generator
+    volumes:
+      - ./wazuh_indexer_ssl_certs/:/certificates/
+      - ./certs.yml:/config/certs.yml

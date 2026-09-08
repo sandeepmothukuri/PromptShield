@@ -11,3 +11,4 @@ opensearch_data/
 wazuh_data/
 docs/img/*.png
 !docs/img/.gitkeep
+config/wazuh_indexer_ssl_certs/

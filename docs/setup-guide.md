@@ -21,7 +21,7 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 
 ```bash
 git clone https://github.com/sandeepmothukuri/PromptShield.git
-cd PromptShield-Lab
+cd PromptShield
 cp .env.example .env
 # Edit .env for any password/model changes
 ```
@@ -29,11 +29,18 @@ cp .env.example .env
 ## 3. Launch the stack
 
 ```bash
+# One-time: generate the Wazuh TLS certificates (manager, indexer, dashboard)
+docker compose -f config/generate-indexer-certs.yml run --rm generator
+
 docker compose up -d
 docker compose ps
 ```
 
-You should see ten healthy containers.
+The Wazuh indexer takes a few minutes on first start (security index initialization), and the manager needs about a minute before all daemons are up:
+
+```bash
+docker exec psl-wazuh-manager /var/ossec/bin/wazuh-control status
+```
 
 ## 4. Pull a model
 
@@ -56,6 +63,9 @@ This script:
 ## 6. Verify
 
 ```bash
+# Wazuh indexer API (host port 9201)
+curl -sk -u admin:SecretPassword https://localhost:9201/
+
 # Should print "ok"
 curl -s http://localhost:8080/healthz
 

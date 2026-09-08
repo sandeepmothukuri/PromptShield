@@ -7,7 +7,7 @@
 <group name="promptshield,llm,">
 
   <rule id="100100" level="3">
-    <decoded_as>promptshield-json</decoded_as>
+    <decoded_as>json</decoded_as>
     <description>PromptShield: LLM request observed</description>
   </rule>
 

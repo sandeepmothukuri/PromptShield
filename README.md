@@ -118,7 +118,7 @@ See [`docs/architecture.md`](docs/architecture.md) for component-by-component de
 
 ### Prerequisites
 - Docker Engine 24+ and Docker Compose v2
-- 16 GB RAM recommended (8 GB minimum)
+- 16 GB RAM recommended (8 GB minimum, Wazuh + OpenSearch are memory hungry)
 - 30 GB free disk
 - Linux, macOS, or Windows with WSL2
 
@@ -126,7 +126,9 @@ See [`docs/architecture.md`](docs/architecture.md) for component-by-component de
 
 ```bash
 git clone https://github.com/sandeepmothukuri/PromptShield.git
-cd PromptShield-Lab
+cd PromptShield
+# One-time: generate the Wazuh TLS certificates
+docker compose -f config/generate-indexer-certs.yml run --rm generator
 cp .env.example .env
 docker compose up -d
 ./scripts/setup.sh
@@ -137,8 +139,9 @@ docker compose up -d
 | Service | URL | Default creds |
 | --- | --- | --- |
 | OpenWebUI | http://localhost:3000 | create on first launch |
-| Wazuh Dashboard | https://localhost:5601 | `admin / SecretPassword` |
-| OpenSearch Dashboards | http://localhost:5602 | `admin / admin` |
+| Wazuh Dashboard | https://localhost:5601 | `admin / SecretPassword` (manager API: `wazuh-wui / MyS3cr37P450r.*-`) |
+| OpenSearch Dashboards | http://localhost:5602 | security plugin disabled |
+| Wazuh indexer API | https://localhost:9201 | `admin / SecretPassword` |
 | LLM-Monitor API | http://localhost:8080/healthz | — |
 
 Full walkthrough: [`docs/setup-guide.md`](docs/setup-guide.md).
