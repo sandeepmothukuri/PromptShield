@@ -9,7 +9,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from classifier import classify_prompt
 from langchain_guard import guardrail_check
 
-
 ROOT = Path(__file__).resolve().parents[2]
 THRESHOLD = 0.65
 

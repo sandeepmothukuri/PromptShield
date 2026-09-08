@@ -10,7 +10,6 @@ prompt-injection-v2) by editing the `_score` function.
 from __future__ import annotations
 
 import re
-from typing import Tuple
 
 PATTERNS = {
     "prompt_injection": [
@@ -51,7 +50,7 @@ PATTERNS = {
 }
 
 
-def _score(prompt: str) -> Tuple[float, str]:
+def _score(prompt: str) -> tuple[float, str]:
     p = prompt.lower()
     for category, patterns in PATTERNS.items():
         for pat in patterns:
@@ -62,5 +61,5 @@ def _score(prompt: str) -> Tuple[float, str]:
     return 0.05, "benign"
 
 
-def classify_prompt(prompt: str) -> Tuple[float, str]:
+def classify_prompt(prompt: str) -> tuple[float, str]:
     return _score(prompt)

@@ -14,11 +14,10 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import FastAPI
-from pydantic import BaseModel
-
 from classifier import classify_prompt
+from fastapi import FastAPI
 from langchain_guard import guardrail_check
+from pydantic import BaseModel
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
 LOG_PATH = Path(os.getenv("LOG_PATH", "/var/log/promptshield/monitor.json"))
