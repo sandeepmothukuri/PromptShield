@@ -245,10 +245,6 @@ Network sensors cannot inspect encrypted LLM content without an inspection point
 
 See the repository contribution guidance before opening changes.
 
-## Licence
-
-MIT — see [LICENSE](LICENSE).
-
 ---
 
 # 👤 Author
