@@ -344,3 +344,4 @@ def test_referenced_lab_scenario_exists(name: str) -> None:
 def test_no_rule_uses_t1059_011() -> None:
     for name, rule in _rules().items():
         assert "attack.t1059.011" not in rule["tags"], f"{name} uses T1059.011"
+        assert "T1059.011" not in str(rule.get("metadata", {})), f"{name} references T1059.011"
