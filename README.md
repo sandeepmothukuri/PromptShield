@@ -83,6 +83,12 @@ stated in [docs/network-detection.md](docs/network-detection.md).
 The reference architecture below shows the six operational planes: attack surface,
 application and monitoring, telemetry, detection, SIEM/search, and analyst workflow.
 
+![OpenWebUI connected through the LLM-Monitor proxy to the protected model runtime](docs/img/openwebui.svg)
+
+The application path is intentionally explicit: OpenWebUI sends requests to the
+LLM-Monitor proxy, which classifies, rate-limits and audits them before they reach
+Ollama. This is the monitored path described by the architecture above.
+
 Source: [`docs/diagrams/architecture.mmd`](docs/diagrams/architecture.mmd)
 
 One record, three consumers:
@@ -136,14 +142,6 @@ Then create the indices and import the dashboards:
 ```bash
 ./scripts/setup.sh
 ```
-
-### Application path
-
-![OpenWebUI connected through the LLM-Monitor proxy to the protected model runtime](docs/img/openwebui.svg)
-
-The application path is intentionally explicit: OpenWebUI sends requests to the
-LLM-Monitor proxy, which classifies, rate-limits and audits them before they reach
-Ollama. This is the monitored path described by the architecture above.
 
 | Service | URL |
 | --- | --- |
