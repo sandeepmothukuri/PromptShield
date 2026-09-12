@@ -11,12 +11,10 @@ written, and every dashboard panel bound to that pattern renders empty.
 from __future__ import annotations
 
 import json
-import os
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import ClassVar
-from unittest.mock import patch
 
 import pytest
 
@@ -357,9 +355,7 @@ def test_index_template_targets_the_shipped_index_pattern() -> None:
     )
 
 
-def test_unwritable_registry_degrades_instead_of_crashing(
-    tmp_path: Path, server: str
-) -> None:
+def test_unwritable_registry_degrades_instead_of_crashing(tmp_path: Path, server: str) -> None:
     """The audit volume is mounted read-only, so the default registry is unwritable.
 
     The offset must fall back to memory rather than raise. Losing it only means

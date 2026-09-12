@@ -482,9 +482,7 @@ def test_shebang_and_executable_bit_agree() -> None:
         if any(part in _EXCLUDED_PARTS for part in path.parts):
             continue
         try:
-            first = path.read_text(
-                encoding="utf-8", errors="ignore"
-            ).split("\n", 1)[0]
+            first = path.read_text(encoding="utf-8", errors="ignore").split("\n", 1)[0]
         except OSError:
             continue
         has_shebang = first.startswith("#!")
