@@ -24,6 +24,25 @@ logsource:
   service: llm-monitor
   definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
 detection:
+  # Primary selection keys on the structured field the proxy computes at
+  # classification time. It survives REDACT_LOGGED_SECRETS=true, which masks the
+  # completion text, so the rule still fires in the default configuration.
+  # The proxy's SECRET_PATTERNS are a strict superset of the literals below.
+  selection_structured:
+    secrets_in_completion|contains:
+      - aws_access_key_id
+      - aws_secret_access_key
+      - google_api_key
+      - openai_style_key
+      - github_pat
+      - github_fine_grained_pat
+      - slack_token
+      - private_key
+      - us_ssn
+      - payment_card
+  # Secondary selections match the raw completion. They only fire when
+  # REDACT_LOGGED_SECRETS=false, and catch anything a future pattern addition
+  # has not yet been listed above.
   selection_cloud_credential:
     completion|re:
       - 'AKIA[0-9A-Z]{16}'
@@ -47,6 +66,7 @@ fields:
   - session_id
   - user
   - model
+  - secrets_in_completion
   - completion
 falsepositives:
   - Documentation or test fixtures that quote credential formats

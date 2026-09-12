@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 700" font-family="Menlo,Consolas,Monaco,monospace">
+  <desc>Illustrative mockup drawn to show what this view looks like. It is not output captured from a running lab; values are representative, not measurements. See docs/screenshots.md for how to capture the real thing.</desc>
+  <g font-family="-apple-system,Segoe UI,Inter,sans-serif"><rect x="892" y="16" width="372" height="26" rx="13" fill="#0f172a" fill-opacity="0.92" stroke="#f59e0b" stroke-width="1.5"/><text x="1078.0" y="33.5" text-anchor="middle" font-size="12" font-weight="600" fill="#fbbf24">Illustrative mockup &#8212; not a captured screenshot</text></g>
   <defs>
     <style>
       .term{fill:#0c0f12}
@@ -30,9 +32,9 @@
     <!-- Header -->
     <text x="20" y="62" class="green">soc@promptshield-lab</text><text x="190" y="62" class="wht">:</text><text x="200" y="62" class="blu">~/PromptShield-Lab</text><text x="370" y="62" class="wht">$ suricata -i eth0 -S detections/suricata/promptshield.rules -v</text>
 
-    <text x="20" y="84"  class="gry">19/5/2026 -- 14:02:11 - &lt;Notice&gt; - This is Suricata version 7.0.6 RELEASE running in IDS mode</text>
+    <text x="20" y="84"  class="gry">19/5/2026 -- 14:02:11 - &lt;Notice&gt; - This is Suricata version 7.0.17 RELEASE running in IDS mode</text>
     <text x="20" y="102" class="gry">19/5/2026 -- 14:02:11 - &lt;Info&gt;   - Loading rules: /etc/suricata/rules/promptshield.rules</text>
-    <text x="20" y="120" class="gry">19/5/2026 -- 14:02:11 - &lt;Info&gt;   - 6 rules loaded successfully · 0 invalid · 0 skipped</text>
+    <text x="20" y="120" class="gry">19/5/2026 -- 14:02:11 - &lt;Info&gt;   - 7 rules loaded successfully · 0 invalid · 0 skipped</text>
     <text x="20" y="138" class="gry">19/5/2026 -- 14:02:12 - &lt;Notice&gt; - all 4 packet processing threads, 4 management threads initialized, engine started</text>
 
     <text x="20" y="170" class="green">soc@promptshield-lab</text><text x="190" y="170" class="wht">:</text><text x="200" y="170" class="blu">~/PromptShield-Lab</text><text x="370" y="170" class="wht">$ tail -f /var/log/suricata/eve.json | jq -c 'select(.event_type==&quot;alert&quot;)'</text>

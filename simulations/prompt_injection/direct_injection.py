@@ -24,6 +24,28 @@ PAYLOADS = [
 ]
 
 
+def _post(client, url: str, payload: dict) -> dict:
+    """POST and return the JSON body, or fail loudly.
+
+    Without this a wrong --target or an unreachable proxy yields a body with no
+    `verdict` key, which the caller would print as `?` and count as "not
+    blocked" - a false negative that looks like a detection failure.
+    """
+    resp = client.post(url, json=payload)
+    if resp.status_code >= 400:
+        raise SystemExit(f"proxy returned HTTP {resp.status_code} for {url}: {resp.text[:160]}")
+    try:
+        body = resp.json()
+    except ValueError as exc:
+        raise SystemExit(f"proxy returned non-JSON for {url}: {resp.text[:160]}") from exc
+    if "verdict" not in body and "attack_type" not in body:
+        raise SystemExit(
+            f"unexpected response shape from {url} (is --target pointing at "
+            f".../chat?): {str(body)[:160]}"
+        )
+    return body
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--target", default="http://localhost:8080/chat")
@@ -33,8 +55,7 @@ def main() -> int:
     blocked = 0
     with httpx.Client(timeout=30) as client:
         for i, payload in enumerate(PAYLOADS, 1):
-            r = client.post(args.target, json={"prompt": payload, "user": args.user})
-            data = r.json()
+            data = _post(client, args.target, {"prompt": payload, "user": args.user})
             verdict = data.get("verdict", "?")
             print(f"[{i:02d}] verdict={verdict:<5}  payload={payload[:60]!r}")
             if verdict == "block":

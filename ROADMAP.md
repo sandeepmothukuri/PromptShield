@@ -70,6 +70,24 @@ Recorded here because each one was a defect, not a feature.
 - Corrected `FLAG_THRESHOLD`, which was `0.30` in `.env.example` and `0.65` in
   `docker-compose.yml`. Anyone who did not copy `.env.example` got the value the
   score-distribution analysis had rejected.
+- Bounded the per-user rate-limit table. It was keyed by caller-supplied
+  username with no ceiling, so rotating usernames leaked a permanent dict entry
+  per identity and would exhaust proxy memory — a denial of service in the
+  component built to detect denial of service. Identities idle beyond the window
+  are now evicted, with a hard ceiling behind that.
+- Serialised audit writes. Concurrent requests could interleave inside one JSON
+  line, and the Wazuh decoder would drop both records.
+- Made secret redaction the default. `REDACT_LOGGED_SECRETS` was `false`, so a
+  pasted credential was written to the audit log and shipped to the search
+  cluster in plaintext. `data_exfiltration_via_llm` was re-keyed primarily on
+  `secrets_in_completion` so it still fires under redaction; its raw-text
+  selections remain for deployments that switch redaction off.
+- Made five simulations fail loudly. A wrong `--target` or an unreachable proxy
+  produced a body with no `verdict`, which the scripts printed as `?` and counted
+  as "not blocked" — a false negative that looked like a detection failure.
+- Corrected three playbooks that instructed containment by "blocking the session
+  at the proxy". No such endpoint exists; containment is directed to the identity
+  layer. All five playbooks now state severity and escalation conditions.
 
 ---
 

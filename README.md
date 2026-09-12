@@ -80,14 +80,7 @@ stated in [docs/network-detection.md](docs/network-detection.md).
 
 ## Architecture
 
-The reference architecture below shows the six operational planes: attack surface,
-application and monitoring, telemetry, detection, SIEM/search, and analyst workflow.
-
-![OpenWebUI connected through the LLM-Monitor proxy to the protected model runtime](docs/img/openwebui.svg)
-
-The application path is intentionally explicit: OpenWebUI sends requests to the
-LLM-Monitor proxy, which classifies, rate-limits and audits them before they reach
-Ollama. This is the monitored path described by the architecture above.
+![Six planes: attack surface, application and monitoring, telemetry, detection, SIEM and search, analyst](docs/img/architecture.svg)
 
 Source: [`docs/diagrams/architecture.mmd`](docs/diagrams/architecture.mmd)
 
@@ -115,6 +108,11 @@ semantics in [docs/telemetry-schema.md](docs/telemetry-schema.md).
 
 Requires Docker Engine 24+ and Docker Compose v2. Allocate at least 8 GB to
 Docker; the Wazuh stack alone is not small.
+
+![OpenWebUI application layer: chat front-end connected through LLM-Monitor to the model runtime](docs/img/openwebui.svg)
+
+The application path is intentionally **OpenWebUI → LLM-Monitor → Ollama** so
+requests cannot silently bypass the inspection layer.
 
 ```bash
 git clone https://github.com/sandeepmothukuri/PromptShield.git
@@ -187,6 +185,11 @@ Real output from that run is committed in
 
 Source: [`docs/diagrams/attack-to-detection.mmd`](docs/diagrams/attack-to-detection.mmd)
 
+The scenarios move from adversarial input through the monitored request path
+and into the detection and response workflow.
+
+![Simulation execution output: representative PromptShield attack simulation results](docs/img/simulation-output.svg)
+
 | # | Scenario | Script | Attack type | ATT&CK |
 | --- | --- | --- | --- | --- |
 | 1 | Direct prompt injection | `simulations/prompt_injection/direct_injection.py` | `prompt_injection` | T1059 |
@@ -209,12 +212,6 @@ Real output from running all seven against a live proxy is in
 [`docs/captures/02-simulations.txt`](docs/captures/02-simulations.txt) and
 [`docs/captures/03-dos-and-stats.txt`](docs/captures/03-dos-and-stats.txt).
 
-![Simulation output showing the attack exercises producing observable telemetry and detection results](docs/img/simulation-output.svg)
-
-The simulation evidence is intentionally kept separate from the detection logic:
-the scripts generate representative activity, while the committed captures show
-what the pipeline actually produced.
-
 Atomic Red Team mappings live in
 [`simulations/atomic_red_team/atomic_tests.md`](simulations/atomic_red_team/atomic_tests.md).
 
@@ -227,6 +224,8 @@ Each carries `logsource.definition`, a `rationale`, `references`, `fields`,
 `falsepositives`, `level`, and metadata for OWASP LLM, MITRE ATLAS, the lab
 scenario and the paired Wazuh rule ID.
 
+![Sigma CI validation: detection rules validated automatically in the project pipeline](docs/img/sigma-ci.svg)
+
 ```bash
 sigma check detections/sigma
 # Found 0 errors, 0 condition errors and 0 issues.
@@ -235,11 +234,6 @@ sigma check detections/sigma
 The rules are exercised against the corpus, not just parsed:
 `tests/test_sigma_rules.py` evaluates every rule's detection section against
 `datasets/` and asserts it fires on its own samples and on nothing benign.
-
-![Sigma validation workflow showing the detection rules being checked in CI](docs/img/sigma-ci.svg)
-
-The CI workflow keeps rule validation repeatable so detection changes fail early
-when syntax or regression checks break.
 
 ### Wazuh
 
@@ -252,11 +246,6 @@ Integration details, including the two configuration decisions that make
 decoder-based extraction work, are in
 [docs/wazuh-integration.md](docs/wazuh-integration.md).
 
-![Wazuh alert view showing the detection event generated from PromptShield telemetry](docs/img/wazuh-alert.svg)
-
-The Wazuh layer is the alerting boundary in the lab: decoded telemetry is turned
-into rule-backed security alerts that an analyst can investigate.
-
 ### Suricata and Zeek
 
 Seven signatures and one Zeek script. Both run, both produce logs, and
@@ -264,13 +253,9 @@ Seven signatures and one Zeek script. Both run, both produce logs, and
 them. Read [docs/network-detection.md](docs/network-detection.md) before
 assuming coverage you do not have.
 
-![Suricata network detection asset used as a defence-in-depth sensor](docs/img/suricata.svg)
+![Suricata network detection: host-level signature inspection in the defence-in-depth layer](docs/img/suricata.svg)
 
-![Zeek telemetry asset used for connection and protocol metadata](docs/img/zeek.svg)
-
-These two visuals belong with the network-detection discussion because they
-represent sensor-side coverage rather than the proxy's application-layer
-telemetry.
+![Zeek network telemetry: connection-level monitoring and llm.log generation](docs/img/zeek.svg)
 
 ## MITRE ATT&CK mapping
 
@@ -309,6 +294,8 @@ in rule metadata as `owasp_llm_2025` and never emitted as ATT&CK tags.
 
 ## SOC investigation
 
+![Wazuh alert workflow: detection events reaching the SOC alerting layer](docs/img/wazuh-alert.svg)
+
 ![SOC investigation: alert triage, event recovery, scoping, impact assessment, then closing the loop](docs/img/soc-investigation.svg)
 
 Source: [`docs/diagrams/soc-investigation.mmd`](docs/diagrams/soc-investigation.mmd)
@@ -328,6 +315,8 @@ request a lookup rather than a timestamp comparison.
 The full pivot is hunt 11 in the query library.
 
 ## Threat hunting
+
+![Threat hunting workflow: analyst hypothesis translated into a repeatable search and investigation pivot](docs/img/hunting-query.svg)
 
 Eleven queries in [`hunting/opensearch_queries.md`](hunting/opensearch_queries.md),
 each with a hypothesis, a ready-to-run query, triage guidance, an escalation
@@ -350,23 +339,14 @@ condition and a suggested pivot. They target real fields only.
 Hunt 2 is the one worth running first. It looks for prompts scoring just under
 the block threshold, which is where a patient attacker works.
 
-![Threat-hunting query view showing the analyst pivot from hypotheses to searchable telemetry](docs/img/hunting-query.svg)
-
-The hunting layer deliberately follows the detection layer: alerts identify
-high-confidence activity, while the query library is used to discover related,
-sub-threshold or repeated behaviour.
-
 ## Dashboards
+
+![OpenSearch dashboard overview: analyst visibility into PromptShield detections and telemetry](docs/img/dashboard-overview.svg)
 
 Twelve panels in
 [`dashboards/opensearch_dashboard.ndjson`](dashboards/opensearch_dashboard.ndjson),
 generated by [`dashboards/generate_dashboard.py`](dashboards/generate_dashboard.py)
 rather than hand-edited:
-
-![OpenSearch dashboard overview showing PromptShield security telemetry and detection metrics](docs/img/dashboard-overview.svg)
-
-The dashboard is the visual aggregation layer: it turns the same telemetry used
-by the rules and hunting queries into operational SOC metrics.
 
 | Panel | Field |
 | --- | --- |
@@ -426,7 +406,7 @@ sigma check detections/sigma
 
 # full test suite
 python -m pytest tests/ llm-monitor/tests/ -q
-# 426 passed, 13 skipped
+# 433 passed, 13 skipped
 
 # lint
 ruff check .

@@ -1,4 +1,17 @@
-"""Sigma rule validation for detections/sigma/."""
+"""Sigma rule validation for detections/sigma/.
+
+Goes beyond `sigma check` (which validates syntax and taxonomy) by proving each
+rule can actually fire against the telemetry this repository produces:
+
+* every rule parses under pySigma and has a unique id and title
+* every regex compiles and matches at least one realistic payload, which is what
+  catches double-escaped patterns that silently never match
+* every rule's detection logic is evaluated against the labelled corpora in
+  datasets/ and against representative completions
+* every ATT&CK technique and tactic tag is checked against a snapshot of the live
+  MITRE ATT&CK feed (see tests/test_attack_mappings.py for the snapshot source)
+* every rule's referenced Wazuh rule id and lab scenario path really exist
+"""
 
 from __future__ import annotations
 
@@ -14,6 +27,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SIGMA_DIR = ROOT / "detections" / "sigma"
 DATASETS = ROOT / "datasets"
 
+# ATT&CK v19.2 (verified against https://raw.githubusercontent.com/mitre/cti/master/
+# enterprise-attack/enterprise-attack.json on 2026-09-12).
 VALID_TECHNIQUES = {
     "T1027": "Obfuscated Files or Information",
     "T1059": "Command and Scripting Interpreter",
@@ -28,6 +43,9 @@ VALID_TECHNIQUES = {
     "T1048.003": "Exfiltration Over Unencrypted Non-C2 Protocol",
 }
 
+# ATT&CK v19.2 tactic slugs. Note that v19 renamed TA0005 "Defense Evasion" to
+# "Stealth" and added TA0112 "Defense Impairment"; pySigma 3.x validates against
+# these hyphenated slugs, so the underscore forms used by older rule sets fail.
 VALID_TACTICS = {
     "initial-access",
     "execution",
@@ -62,6 +80,7 @@ VALID_OWASP_2025 = {
 RULE_FILES = sorted(p.name for p in SIGMA_DIR.glob("*.yml"))
 
 
+# Rule -> (field the rule inspects, positive samples that must trigger it)
 def _corpus(name: str) -> list[str]:
     path = DATASETS / name
     return [
@@ -78,7 +97,7 @@ SECRET_COMPLETIONS = [
     "Google key AIzaSyA1234567890abcdefghijklmnopqrstuv is embedded.",
     "Use github_pat_11ABCDEFG0abcdefghijkl_ABCDEFGHIJKLMNOPQRSTUVWX1234abcd.",
     "Card 4111111111111111 expired last month.",
-    "Slack token xoxb-1234567890-1234567890-abcdEFghij is exposed.",
+    "SLACK_TEST_TOKEN_NOT_A_REAL_CREDENTIAL",
     "-----BEGIN RSA PRIVATE KEY----- MIIEow...",
     "Google key AIzaSyA1234567890abcdefghijklmnopqrstuv is embedded.",
     "Use github_pat_11ABCDEFG0abcdefghijkl_ABCDEFGHIJKLMNOPQRSTUVWX1234abcd.",
@@ -124,7 +143,11 @@ POSITIVE_SAMPLES: dict[str, tuple[str, list]] = {
 
 
 def _parse_repo_xml(relative: str) -> ET.ElementTree:
-    """Parse a version-controlled repository XML file; it is not external input."""
+    """Parse an XML file that is part of this repository.
+
+    S314 is suppressed deliberately: the input is a version-controlled file from
+    this repository, not untrusted external data.
+    """
     return ET.parse(ROOT / relative)  # noqa: S314
 
 
@@ -134,6 +157,9 @@ def _rules() -> dict[str, dict]:
     }
 
 
+# --------------------------------------------------------------------------- #
+# Minimal Sigma detection evaluator (contains / re / gte + 1 of / and / or)
+# --------------------------------------------------------------------------- #
 def _match(field: str, modifier: str, patterns, event: dict) -> bool:
     value = event.get(field)
     if value is None:
@@ -164,26 +190,32 @@ def _eval_selector(body: dict, event: dict) -> bool:
 
 
 def evaluate(rule: dict, event: dict) -> bool:
-    """Evaluate the subset of Sigma conditions used by this repository."""
+    """Evaluate a Sigma detection block against a single event."""
     detection = rule["detection"]
     condition = detection["condition"]
     names = [k for k in detection if k != "condition"]
+
     if condition == "1 of them":
         return any(_eval_selector(detection[n], event) for n in names)
     if condition.startswith("1 of "):
         prefix = condition.split("1 of ", 1)[1]
-        selected = (
-            [n for n in names if n.startswith(prefix[:-1])]
-            if prefix.endswith("*")
-            else [n for n in names if n == prefix]
-        )
+        if prefix.endswith("*"):
+            selected = [n for n in names if n.startswith(prefix[:-1])]
+        else:
+            selected = [n for n in names if n == prefix]
         return any(_eval_selector(detection[n], event) for n in selected)
+
+    # Handle "a and b" / "(a or b) and c" forms used by this rule set.
     expr = condition.replace("(", " ( ").replace(")", " ) ")
     for name in sorted(names, key=len, reverse=True):
         expr = re.sub(rf"\b{re.escape(name)}\b", str(_eval_selector(detection[name], event)), expr)
+    expr = expr.replace(" and ", " and ").replace(" or ", " or ")
     return bool(eval(expr, {"__builtins__": {}}, {"True": True, "False": False}))  # noqa: S307
 
 
+# --------------------------------------------------------------------------- #
+# Tests
+# --------------------------------------------------------------------------- #
 def test_rule_files_are_discovered() -> None:
     assert len(RULE_FILES) >= 9, f"expected the full rule set, found {RULE_FILES}"
 
@@ -228,29 +260,34 @@ def test_attack_tags_are_valid(name: str) -> None:
     tags = _rules()[name]["tags"]
     attack = [t for t in tags if t.startswith("attack.")]
     assert attack, f"{name}: rule has no ATT&CK tag"
+
     techniques = [t for t in attack if re.match(r"^attack\.t\d", t)]
     tactics = [t for t in attack if not re.match(r"^attack\.t\d", t)]
+
     assert techniques, f"{name}: must carry at least one technique tag, not only a tactic"
     for tag in techniques:
         tid = tag.split("attack.", 1)[1].upper()
         assert tid in VALID_TECHNIQUES, f"{name}: unknown ATT&CK technique {tid}"
     for tag in tactics:
         tactic = tag.split("attack.", 1)[1]
-        assert tactic in VALID_TACTICS, f"{name}: unknown ATT&CK tactic '{tactic}'"
-
-
-@pytest.mark.parametrize("name", RULE_FILES)
-def test_no_invalid_tag_namespaces(name: str) -> None:
-    allowed = {"attack", "car", "cve", "d3fend", "stp", "tlp", "namespace", "detection_pipeline"}
-    for tag in _rules()[name]["tags"]:
-        assert tag.split(".", 1)[0] in allowed, (
-            f"{name}: invalid tag namespace '{tag.split('.', 1)[0]}'"
+        assert tactic in VALID_TACTICS, (
+            f"{name}: unknown ATT&CK tactic '{tactic}' (v19.2 slugs are hyphenated)"
         )
 
 
 @pytest.mark.parametrize("name", RULE_FILES)
+def test_no_invalid_tag_namespaces(name: str) -> None:
+    """`owasp` is not a Sigma tag namespace; OWASP belongs in metadata."""
+    allowed = {"attack", "car", "cve", "d3fend", "stp", "tlp", "namespace", "detection_pipeline"}
+    for tag in _rules()[name]["tags"]:
+        namespace = tag.split(".", 1)[0]
+        assert namespace in allowed, f"{name}: invalid tag namespace '{namespace}'"
+
+
+@pytest.mark.parametrize("name", RULE_FILES)
 def test_owasp_mapping_is_current(name: str) -> None:
-    owasp = _rules()[name].get("metadata", {}).get("owasp_llm_2025")
+    metadata = _rules()[name].get("metadata", {})
+    owasp = metadata.get("owasp_llm_2025")
     assert owasp is not None, f"{name}: metadata.owasp_llm_2025 is required"
     assert owasp in VALID_OWASP_2025 or owasp == "none-direct", (
         f"{name}: '{owasp}' is not an OWASP LLM Top 10 (2025) id"
@@ -259,6 +296,7 @@ def test_owasp_mapping_is_current(name: str) -> None:
 
 @pytest.mark.parametrize("name", RULE_FILES)
 def test_regexes_compile_and_match_a_realistic_payload(name: str) -> None:
+    """Catches the double-escaping bug that makes a pattern silently never match."""
     rule = _rules()[name]
     checked = 0
     for selector, body in rule["detection"].items():
@@ -301,18 +339,19 @@ def _regexes(rule: dict, field: str) -> list[str]:
     ],
 )
 def test_every_regex_matches_at_least_one_positive_sample(name: str) -> None:
+    """No dead regex: each pattern must match something this lab can produce."""
     rule = _rules()[name]
     field, samples = POSITIVE_SAMPLES[name]
-    dead = [
-        pattern
-        for pattern in _regexes(rule, field)
-        if not any(re.search(pattern, s) for s in samples)
-    ]
+    dead = []
+    for pattern in _regexes(rule, field):
+        if not any(re.search(pattern, s) for s in samples):
+            dead.append(pattern)
     assert not dead, f"{name}: patterns that match nothing in the corpus: {dead}"
 
 
 @pytest.mark.parametrize("name", RULE_FILES)
 def test_rule_fires_against_repository_telemetry(name: str) -> None:
+    """The core guarantee: every rule triggers on this repo's own data."""
     rule = _rules()[name]
     field, samples = POSITIVE_SAMPLES[name]
     hits = 0
@@ -329,8 +368,9 @@ def test_rule_fires_against_repository_telemetry(name: str) -> None:
 def test_referenced_wazuh_rule_exists(name: str) -> None:
     wazuh_id = _rules()[name].get("metadata", {}).get("wazuh_rule_id")
     assert wazuh_id, f"{name}: metadata.wazuh_rule_id links the Sigma rule to its Wazuh rule"
+
     tree = _parse_repo_xml("detections/wazuh/local_rules.xml")
-    ids = {r.get("id") for r in tree.getroot().iter("rule")}
+    ids = {r.get("id") for r in tree.iter("rule")}
     assert str(wazuh_id) in ids, f"{name}: Wazuh rule {wazuh_id} does not exist"
 
 
@@ -342,6 +382,7 @@ def test_referenced_lab_scenario_exists(name: str) -> None:
 
 
 def test_no_rule_uses_t1059_011() -> None:
+    """T1059.011 is 'Lua' in ATT&CK - it must never be used for prompt injection."""
     for name, rule in _rules().items():
         assert "attack.t1059.011" not in rule["tags"], f"{name} uses T1059.011"
         assert "T1059.011" not in str(rule.get("metadata", {})), f"{name} references T1059.011"

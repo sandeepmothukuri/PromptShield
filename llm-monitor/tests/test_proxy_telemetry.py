@@ -376,3 +376,64 @@ def test_models_endpoint_reflects_the_runtime_when_reachable(
     monkeypatch.setattr(proxy.httpx, "AsyncClient", _Client)
     ids = [m["id"] for m in client.get("/v1/models").json()["data"]]
     assert ids == ["llama3:8b", "mistral:7b"]
+
+
+def test_rate_limit_table_is_bounded(monkeypatch) -> None:
+    """The table is keyed by caller-supplied username, so it must not grow freely.
+
+    Rotating usernames would otherwise leak a permanent dict entry per identity
+    and exhaust proxy memory - a denial of service in the component meant to
+    detect denial of service.
+    """
+    monkeypatch.setattr(proxy, "_MAX_TRACKED_USERS", 200)
+    proxy._request_log.clear()
+    for i in range(3000):
+        proxy._check_rate_limit(f"rotating-{i}")
+    assert len(proxy._request_log) <= 200, (
+        f"rate-limit table grew to {len(proxy._request_log)} entries"
+    )
+
+
+def test_rate_limiting_still_works_after_eviction(monkeypatch) -> None:
+    """Eviction must not disable rate limiting for an active identity."""
+    monkeypatch.setattr(proxy, "_MAX_TRACKED_USERS", 200)
+    monkeypatch.setattr(proxy, "RATE_LIMIT_REQUESTS", 3)
+    proxy._request_log.clear()
+    for _ in range(3):
+        allowed, _ = proxy._check_rate_limit("steady-user")
+        assert allowed
+    allowed, count = proxy._check_rate_limit("steady-user")
+    assert not allowed, "rate limit did not engage"
+    assert count == 3
+
+
+def test_audit_writes_are_serialised(monkeypatch, tmp_path) -> None:
+    """Concurrent requests must not interleave inside one JSON line.
+
+    Everything downstream parses these lines as JSON, so a corrupted line costs
+    both records and the Wazuh decoder drops them.
+    """
+    import concurrent.futures
+    import json as _json
+
+    log = tmp_path / "monitor.json"
+    monkeypatch.setattr(proxy, "LOG_PATH", log)
+
+    def write(i: int) -> None:
+        proxy._audit({"n": i, "pad": "x" * 400})
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as ex:
+        list(ex.map(write, range(200)))
+
+    lines = log.read_text().splitlines()
+    assert len(lines) == 200, f"expected 200 lines, got {len(lines)}"
+    for line in lines:  # every line must be independently parseable
+        _json.loads(line)
+
+
+def test_secrets_are_redacted_by_default(monkeypatch, tmp_path) -> None:
+    """The shipped default must not write raw credentials to the audit log."""
+    monkeypatch.setattr(proxy, "REDACT_LOGGED_SECRETS", True)
+    out = proxy._redact("my key is AKIAIOSFODNN7EXAMPLE")
+    assert "AKIAIOSFODNN7EXAMPLE" not in out
+    assert "REDACTED:aws_access_key_id" in out

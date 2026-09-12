@@ -9,7 +9,9 @@
 
 ## Containment
 - Rotate every leaked credential **before** anything else. AWS/GCP/Azure keys: revoke + rotate in IAM; GitHub PATs: revoke; Slack tokens: revoke.
-- Block the session at the proxy.
+- Suspend the user's LLM access at the identity layer. The proxy has no
+  session-blocking API, so containment happens where identity already exists —
+  IdP suspension or credential revocation, not at `:8080`.
 - If the secret was sourced from RAG, remove the document and reindex.
 
 ## Eradication
@@ -23,6 +25,17 @@
 ## Comms
 - Security leadership, key owner, app owner: immediate.
 - If regulated data: privacy/legal within 1 h, regulator within statutory window.
+
+## Severity
+`critical`. Credential material has crossed its trust boundary regardless of
+intent; rotate first and triage afterwards.
+
+## Escalation
+- Any rotated credential owned by another team: notify the owner immediately.
+- Regulated data (PII, PCI, PHI): privacy/legal within 1 h, regulator inside the
+  statutory window.
+- More than one distinct credential in a 24 h window: treat as a systemic
+  ingestion defect, not a user incident, and open a detection-gap review.
 
 ## Evidence
 - Audit-log JSON line(s)

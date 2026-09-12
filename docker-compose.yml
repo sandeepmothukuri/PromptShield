@@ -78,6 +78,8 @@ services:
       # Every variable documented in .env.example must be forwarded here,
       # otherwise it is dead config: setting it in .env would silently do
       # nothing. tests/test_env_consistency.py enforces this.
+      # Default mirrors .env.example. 0.30 is derived from the classifier's
+      # actual score set; 0.65 would leave the hunt-2 band empty.
       - FLAG_THRESHOLD=${FLAG_THRESHOLD:-0.30}
       - MAX_PROMPT_CHARS=${MAX_PROMPT_CHARS:-32000}
       - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS:-20}
@@ -146,6 +148,7 @@ services:
         soft: 65536
         hard: 65536
     ports:
+      # Host port 9201; 9200 belongs to the standalone OpenSearch service below
       - "${WAZUH_INDEXER_PORT:-9201}:9200"
     volumes:
       - wazuh_indexer_data:/var/lib/wazuh-indexer
@@ -205,6 +208,9 @@ services:
     command: zeek -i eth0 /usr/local/zeek/share/zeek/site/llm_telemetry.zeek
 
   # ---------- Telemetry shipping ----------
+  # The proxy writes a local JSONL audit log. Without this service nothing
+  # populates promptshield-* and every dashboard panel bound to it is empty.
+  # See docs/telemetry-schema.md and tests/test_ship_logs.py.
   log-shipper:
     build: ./llm-monitor
     container_name: psl-log-shipper
@@ -219,7 +225,11 @@ services:
       - OPENSEARCH_URL=http://opensearch:9200
       - INDEX_PREFIX=promptshield
     volumes:
+      # Read-only: the shipper must not be able to alter the audit log.
       - monitor_logs:/var/log/promptshield:ro
+      # Writable, for the byte-offset registry. Keeping this in a separate
+      # volume is what lets the log mount stay read-only; without it the
+      # default registry path would land inside the :ro mount.
       - shipper_state:/var/lib/promptshield-shipper
       - ./scripts/ship_logs.py:/app/scripts/ship_logs.py:ro
       - ./config/opensearch:/app/config/opensearch:ro

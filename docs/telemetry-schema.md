@@ -100,7 +100,7 @@ Every threshold is an environment variable; defaults are in `.env.example`.
 | `MAX_PROMPT_CHARS` | `32000` | Longer prompts are rejected with 413 and audited as `token_flood`. |
 | `RATE_LIMIT_REQUESTS` / `RATE_LIMIT_WINDOW_SECONDS` | `20` / `60` | Per-user sliding window. Exceeding it returns 429 and audits `token_flood`. |
 | `MAX_LOGGED_COMPLETION_CHARS` | `4000` | Completion truncation in the audit log. |
-| `REDACT_LOGGED_SECRETS` | `false` | See [Privacy](#privacy). |
+| `REDACT_LOGGED_SECRETS` | `true` | See [Privacy](#privacy). |
 
 Indicator weights are in `llm-monitor/classifier.py`. A single strong indicator
 (0.9) blocks on its own; weak indicators (0.3–0.55) must combine, which is why
@@ -129,13 +129,17 @@ on hashes, and an analyst needs the actual text to triage.
 
 Consequences, stated plainly:
 
-- The log may contain secrets that users pasted, and secrets the model disclosed.
-  `secrets_in_prompt` / `secrets_in_completion` name what was found so the volume
-  can be assessed without reading the content.
-- Anyone who can read `promptshield-*` or the Wazuh alerts can read user prompts.
-  Scope index permissions accordingly; the lab runs with the Wazuh indexer's
-  default `admin` account and no per-tenant isolation.
-- Set `REDACT_LOGGED_SECRETS=true` to mask credential-shaped substrings before
-  they are written. **This breaks `data_exfiltration_via_llm.yml`**, which
-  matches secret patterns in the completion — that is the intended trade-off, not
-  a bug. `prompt_hash` still allows grouping.
+- Credential-shaped substrings are masked before they are written, because
+  `REDACT_LOGGED_SECRETS` defaults to `true`. `secrets_in_prompt` /
+  `secrets_in_completion` still name what was found, so the volume is assessable
+  without the content.
+- `data_exfiltration_via_llm.yml` keys primarily on `secrets_in_completion`, so
+  it still fires under redaction. Its raw-text selections only match when
+  redaction is switched off.
+- Anyone who can read `promptshield-*` or the Wazuh alerts can read user prompts
+  that contain no credential material. Scope index permissions accordingly; the
+  lab runs with the Wazuh indexer's default `admin` account and no per-tenant
+  isolation.
+- Setting `REDACT_LOGGED_SECRETS=false` restores raw text for detection tuning.
+  Do not do that on a deployment where the prompt stream carries real
+  credentials.

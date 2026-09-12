@@ -21,6 +21,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import threading
 import time
 import uuid
@@ -34,7 +35,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from classifier import ATTACK_TYPES, classify, scan_secrets
+from classifier import ATTACK_TYPES, SECRET_PATTERNS, classify, scan_secrets
 
 # --------------------------------------------------------------------------- #
 # Configuration (see .env.example)
@@ -46,7 +47,10 @@ THRESHOLD = float(os.getenv("CLASSIFIER_THRESHOLD", "0.65"))
 MAX_PROMPT_CHARS = int(os.getenv("MAX_PROMPT_CHARS", "32000"))
 RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "20"))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
-REDACT_LOGGED_SECRETS = os.getenv("REDACT_LOGGED_SECRETS", "false").lower() == "true"
+# Secure by default: a prompt can contain a real credential, and the audit log is
+# shipped to a search cluster with a wider audience than the model runtime. Set
+# to false only when the raw text is needed for detection tuning.
+REDACT_LOGGED_SECRETS = os.getenv("REDACT_LOGGED_SECRETS", "true").lower() == "true"
 MAX_LOGGED_COMPLETION_CHARS = int(os.getenv("MAX_LOGGED_COMPLETION_CHARS", "4000"))
 
 LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -71,6 +75,7 @@ _request_log: dict[str, deque[float]] = {}
 _rate_lock = threading.Lock()
 _counters: dict[str, int] = {}
 _counter_lock = threading.Lock()
+_audit_lock = threading.Lock()
 
 
 class ChatRequest(BaseModel):
@@ -113,16 +118,21 @@ def _estimate_tokens(text: str) -> int:
 
 
 def _redact(text: str) -> str:
-    """Mask credential-shaped substrings when REDACT_LOGGED_SECRETS=true."""
+    """Mask credential-shaped substrings before they reach the audit log."""
     if not REDACT_LOGGED_SECRETS:
         return text
-    import re
-
-    from classifier import SECRET_PATTERNS
-
     for pattern, name in SECRET_PATTERNS:
         text = re.sub(pattern, f"[REDACTED:{name}]", text)
     return text
+
+
+# Hard ceiling on tracked identities. The table is keyed by caller-supplied
+# username, so an attacker rotating usernames would otherwise grow it without
+# bound and exhaust proxy memory. When the ceiling is hit, identities whose
+# window has fully expired are dropped; if that is not enough, the oldest
+# entries are evicted. Losing rate-limit state for an idle identity is a lesser
+# harm than an unbounded allocation.
+_MAX_TRACKED_USERS = 10000
 
 
 def _check_rate_limit(user: str) -> tuple[bool, int]:
@@ -130,7 +140,11 @@ def _check_rate_limit(user: str) -> tuple[bool, int]:
     now = time.monotonic()
     cutoff = now - RATE_LIMIT_WINDOW_SECONDS
     with _rate_lock:
-        window = _request_log.setdefault(user, deque())
+        window = _request_log.get(user)
+        if window is None:
+            if len(_request_log) >= _MAX_TRACKED_USERS:
+                _evict_stale_users(cutoff)
+            window = _request_log.setdefault(user, deque())
         while window and window[0] < cutoff:
             window.popleft()
         count = len(window)
@@ -140,16 +154,38 @@ def _check_rate_limit(user: str) -> tuple[bool, int]:
         return True, count + 1
 
 
+def _evict_stale_users(cutoff: float) -> None:
+    """Drop rate-limit state for identities with no activity in the window.
+
+    Called with ``_rate_lock`` held.
+    """
+    stale = [u for u, w in _request_log.items() if not w or w[-1] < cutoff]
+    for u in stale:
+        del _request_log[u]
+    if len(_request_log) >= _MAX_TRACKED_USERS:
+        # Every remaining identity is still inside its window. Evict the oldest
+        # by last activity rather than refuse to track anyone at all.
+        ordered = sorted(_request_log, key=lambda u: _request_log[u][-1])
+        for u in ordered[: len(_request_log) - _MAX_TRACKED_USERS + 1]:
+            del _request_log[u]
+
+
 def _bump(attack_type: str) -> None:
     with _counter_lock:
         _counters[attack_type] = _counters.get(attack_type, 0) + 1
 
 
 def _audit(event: dict[str, Any]) -> None:
-    """Append one JSON line to the audit log."""
+    """Append one JSON line to the audit log.
+
+    Writes are serialised: the whole pipeline downstream parses these lines as
+    JSON, so two concurrent requests interleaving inside a single line would
+    corrupt both records and the Wazuh decoder would drop them.
+    """
+    line = json.dumps(event, ensure_ascii=False) + "\n"
     try:
-        with LOG_PATH.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(event, ensure_ascii=False) + "\n")
+        with _audit_lock, LOG_PATH.open("a", encoding="utf-8") as fh:
+            fh.write(line)
     except OSError as exc:  # never let logging break the request path
         log.error("audit write failed: %s", exc)
 
