@@ -151,6 +151,14 @@ Ten Sigma rules, ten Wazuh rules, seven Suricata signatures and one Zeek script 
 
 <p align="center"><sub>Figure 6 — Detection-as-code validation in CI</sub></p>
 
+<p align="center">
+  <img src="docs/img/wazuh-alert.svg" alt="Illustrative Wazuh security-event view showing PromptShield alerts, rule details and MITRE mapping" width="100%">
+</p>
+
+<p align="center"><sub>Figure 7 — Wazuh alert triage and rule context</sub></p>
+
+> **Visual note:** this Wazuh asset is an illustrative mockup, not a captured live-lab screenshot. The SVG itself documents that distinction and points to `docs/screenshots.md` for real evidence capture.
+
 ## MITRE ATT&CK mapping
 
 The project maps supported LLM security behaviours to Enterprise ATT&CK where appropriate and uses MITRE ATLAS for ML-native behaviour.
@@ -163,7 +171,7 @@ Correlation identifiers connect alerts back to originating requests so analysts 
   <img src="docs/img/soc-investigation.svg" alt="PromptShield SOC investigation workflow pivoting from alert to telemetry and hunting" width="100%">
 </p>
 
-<p align="center"><sub>Figure 7 — SOC investigation and correlation workflow</sub></p>
+<p align="center"><sub>Figure 8 — SOC investigation and correlation workflow</sub></p>
 
 The primary correlation key is `request_id`, with `session_id`, `user`, `source_ip` and `prompt_hash` supporting additional pivots. The full contract is documented in [`docs/telemetry-schema.md`](docs/telemetry-schema.md).
 
@@ -175,7 +183,7 @@ The repository includes hypothesis-driven OpenSearch queries covering injection,
   <img src="docs/img/hunting-query.svg" alt="PromptShield threat hunting query and investigation pivots" width="100%">
 </p>
 
-<p align="center"><sub>Figure 8 — Threat hunting query workflow</sub></p>
+<p align="center"><sub>Figure 9 — Threat hunting query workflow</sub></p>
 
 ## Dashboards
 
@@ -185,7 +193,7 @@ OpenSearch Dashboards provides the analyst search and visualization layer for Pr
   <img src="docs/img/dashboard-overview.svg" alt="PromptShield OpenSearch dashboard overview with prompt security metrics" width="100%">
 </p>
 
-<p align="center"><sub>Figure 9 — PromptShield dashboard overview</sub></p>
+<p align="center"><sub>Figure 10 — PromptShield dashboard overview</sub></p>
 
 > **Visual note:** this repository asset is an illustrative dashboard mockup, not a captured production or live-lab screenshot. See `docs/screenshots.md` for instructions to capture real evidence from the running stack.
 
@@ -199,7 +207,7 @@ Response playbooks are designed around explicit safety gates and controlled auto
   <img src="docs/img/incident-response.svg" alt="PromptShield incident response workflow from alert triage through containment and recovery" width="100%">
 </p>
 
-<p align="center"><sub>Figure 10 — Incident response operating model</sub></p>
+<p align="center"><sub>Figure 11 — Incident response operating model</sub></p>
 
 ## Network detection
 
@@ -209,13 +217,13 @@ PromptShield includes network-oriented detection content for the LLM traffic pat
   <img src="docs/img/suricata.svg" alt="PromptShield Suricata network detection flow" width="100%">
 </p>
 
-<p align="center"><sub>Figure 11 — Suricata inspection and signature workflow</sub></p>
+<p align="center"><sub>Figure 12 — Suricata inspection and signature workflow</sub></p>
 
 <p align="center">
   <img src="docs/img/zeek.svg" alt="PromptShield Zeek telemetry and network analysis workflow" width="100%">
 </p>
 
-<p align="center"><sub>Figure 12 — Zeek telemetry and network analysis workflow</sub></p>
+<p align="center"><sub>Figure 13 — Zeek telemetry and network analysis workflow</sub></p>
 
 ## Validation
 
