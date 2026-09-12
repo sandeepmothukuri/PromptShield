@@ -78,6 +78,6 @@ jobs:
       # Sigma evaluation, ATT&CK mapping, dashboard field and documentation
       # integrity suites, which is most of the detection coverage.
       - name: Run tests
-  env:
-    PYTHONPATH: .
-  run: python -m pytest tests/ llm-monitor/tests/ -q
+        env:
+          PYTHONPATH: .
+        run: python -m pytest tests/ llm-monitor/tests/ -q
