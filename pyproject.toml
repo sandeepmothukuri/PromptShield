@@ -7,10 +7,10 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Sandeep Mothukuri" }]
 
-# The installable service lives in llm-monitor/ (see llm-monitor/requirements.txt).
-# The simulation and script entry points are run directly with python, so this
-# project declares no runtime dependencies of its own.
 dependencies = []
+
+[project.scripts]
+promptshield = "promptshield_cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -24,13 +24,6 @@ dev = [
 testpaths = ["tests", "llm-monitor/tests"]
 addopts = "-q"
 
-# ---------------------------------------------------------------------------
-# Lint configuration
-#
-# Declared here rather than left to ruff's defaults on purpose: ruff expands its
-# default rule set between releases, so an unpinned `ruff check .` is not
-# reproducible. CI pins the version in .github/workflows/ci.yml to match.
-# ---------------------------------------------------------------------------
 [tool.ruff]
 target-version = "py311"
 line-length = 100
@@ -41,31 +34,26 @@ extend-exclude = [
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "UP",  # pyupgrade
-    "B",   # flake8-bugbear
-    "S",   # flake8-bandit - this is a security repository, so security smells matter
-    "DTZ", # flake8-datetimez - telemetry timestamps must be timezone aware
-    "RUF", # ruff-specific
-    "EXE", # flake8-executable - shebang/executable-bit consistency
+    "E",
+    "W",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "S",
+    "DTZ",
+    "RUF",
+    "EXE",
 ]
 ignore = [
-    # Detection logic is expressed as long literal pattern lists; wrapping them
-    # hurts reviewability more than the line length does.
     "E501",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Test fixtures must contain credential-shaped strings and injection payloads.
 "tests/*" = ["S101", "S105", "S106"]
 "llm-monitor/tests/*" = ["S101", "S105", "S106"]
-# The classifier and guard are pattern databases by design.
 "llm-monitor/classifier.py" = ["S105"]
 "llm-monitor/langchain_guard.py" = ["S105"]
-# Simulations exist to send attack payloads.
 "simulations/*" = ["S105", "S106", "S311"]
 "scripts/*" = ["S311"]
 
