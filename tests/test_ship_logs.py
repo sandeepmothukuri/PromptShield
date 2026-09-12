@@ -16,6 +16,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import ClassVar
+from unittest.mock import patch
 
 import pytest
 
@@ -356,7 +357,9 @@ def test_index_template_targets_the_shipped_index_pattern() -> None:
     )
 
 
-def test_unwritable_registry_degrades_instead_of_crashing(tmp_path: Path, server: str) -> None:
+def test_unwritable_registry_degrades_instead_of_crashing(
+    tmp_path: Path, server: str
+) -> None:
     """The audit volume is mounted read-only, so the default registry is unwritable.
 
     The offset must fall back to memory rather than raise. Losing it only means
@@ -367,8 +370,6 @@ def test_unwritable_registry_degrades_instead_of_crashing(tmp_path: Path, server
     log_dir.mkdir()
     log = log_dir / "monitor.json"
     log.write_text(json.dumps(make_event(1)) + "\n", encoding="utf-8")
-    # Restrictive on purpose: this simulates the container's read-only mount.
-    os.chmod(log_dir, 0o555)  # noqa: S103
 
     shipper = Shipper(
         log_path=log,
@@ -376,13 +377,20 @@ def test_unwritable_registry_degrades_instead_of_crashing(tmp_path: Path, server
         index="promptshield",
         registry=log.with_suffix(log.suffix + ".offset"),
     )
-    try:
-        assert shipper.drain_once() == 1, "shipping must still succeed"
-        assert shipper._memory_offset is not None, "offset should fall back to memory"
 
-        # A second pass must not re-ship, proving the in-memory offset is used.
-        with log.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(make_event(2)) + "\n")
-        assert shipper.drain_once() == 1
-    finally:
-        os.chmod(log_dir, 0o755)  # noqa: S103  # restore so tmp cleanup can remove it
+    from unittest.mock import patch
+
+    with patch.object(
+        Path,
+        "write_text",
+        side_effect=OSError("simulated read-only registry"),
+    ):
+        assert shipper.drain_once() == 1, "shipping must still succeed"
+
+    assert shipper._memory_offset is not None, "offset should fall back to memory"
+
+    # A second pass must not re-ship, proving the in-memory offset is used.
+    with log.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(make_event(2)) + "\n")
+
+    assert shipper.drain_once() == 1

@@ -472,14 +472,19 @@ def test_shebang_and_executable_bit_agree() -> None:
 
     These bits are lost easily — a plain file rewrite or a checkout on a
     filesystem without exec support drops them — and nothing else notices, so
-    the scripts silently stop being runnable as `./script.py`.
+    the scripts silently stop being runnable as ./script.py.
     """
+    if os.name == "nt":
+        pytest.skip("Unix executable-bit validation is not reliable on Windows")
+
     bad: list[str] = []
     for path in ROOT.rglob("*.py"):
         if any(part in _EXCLUDED_PARTS for part in path.parts):
             continue
         try:
-            first = path.read_text(encoding="utf-8", errors="ignore").split("\n", 1)[0]
+            first = path.read_text(
+                encoding="utf-8", errors="ignore"
+            ).split("\n", 1)[0]
         except OSError:
             continue
         has_shebang = first.startswith("#!")

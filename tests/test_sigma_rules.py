@@ -97,7 +97,7 @@ SECRET_COMPLETIONS = [
     "Google key AIzaSyA1234567890abcdefghijklmnopqrstuv is embedded.",
     "Use github_pat_11ABCDEFG0abcdefghijkl_ABCDEFGHIJKLMNOPQRSTUVWX1234abcd.",
     "Card 4111111111111111 expired last month.",
-    "SLACK_TEST_TOKEN_NOT_A_REAL_CREDENTIAL",
+"xoxb-" + "A" * 12,
     "-----BEGIN RSA PRIVATE KEY----- MIIEow...",
     "Google key AIzaSyA1234567890abcdefghijklmnopqrstuv is embedded.",
     "Use github_pat_11ABCDEFG0abcdefghijkl_ABCDEFGHIJKLMNOPQRSTUVWX1234abcd.",

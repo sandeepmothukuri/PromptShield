@@ -185,7 +185,7 @@ def test_generator_is_the_source_of_truth() -> None:
         target = Path(tmp) / "opensearch_dashboard.ndjson"
         script = GENERATOR.read_text(encoding="utf-8").replace(
             'OUT = Path(__file__).with_name("opensearch_dashboard.ndjson")',
-            f'OUT = Path("{target}")',
+            f"OUT = Path({str(target)!r})",
         )
         runner = Path(tmp) / "gen.py"
         runner.write_text(script, encoding="utf-8")
