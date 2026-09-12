@@ -1,36 +1,53 @@
-%% PromptShield-Lab — Mermaid source for the architecture diagram.
-%% Render with `mmdc -i architecture.mmd -o architecture.svg` or in any
-%% Mermaid-aware previewer (GitHub renders this natively).
-
-flowchart LR
-    subgraph Adversary
-        ATK[Attacker / Simulation Scripts]
+%% PromptShield-Lab reference architecture
+%% Source of truth for docs/img/architecture.svg.
+%% Render: mmdc -i architecture.mmd -o ../img/architecture.svg
+%% GitHub also renders this file if pasted into a ```mermaid fenced block.
+flowchart TB
+    subgraph L1["1 - ATTACK SURFACE"]
+        SIM["simulations/<br/>adversary emulation"]
+        DS["datasets/*.jsonl<br/>72 labelled prompts"]
+        ING["scripts/ingest_logs.py<br/>corpus replay"]
     end
 
-    subgraph LLM Plane
-        WEB[OpenWebUI]
-        MON[LLM-Monitor Proxy<br/>FastAPI + LangChain]
-        OLL[Ollama<br/>Llama3 / Mistral]
+    subgraph L2["2 - APPLICATION AND MONITORING"]
+        WEBUI["OpenWebUI<br/>chat front-end :3000"]
+        MON["LLM-Monitor proxy<br/>classifier.py / langchain_guard.py<br/>/chat /v1/chat/completions :8080"]
+        OLLAMA["Ollama<br/>local model runtime :11434"]
     end
 
-    subgraph Detection Plane
-        SUR[Suricata IDS]
-        ZEK[Zeek NSM]
-        WAZ[Wazuh Manager<br/>Decoders + Rules]
+    subgraph L3["3 - TELEMETRY"]
+        LOG["monitor.json<br/>one JSON event per request<br/>27 documented fields"]
+        WIRE["Suricata eve.json / Zeek llm.log<br/>host capture - not shipped to index"]
     end
 
-    subgraph Storage & UI
-        OSE[(OpenSearch)]
-        OSD[OpenSearch Dashboards]
-        WDB[Wazuh Dashboard]
+    subgraph L4["4 - DETECTION"]
+        SIGMA["Sigma - 10 rules"]
+        WAZUHR["Wazuh rules 100100-100190"]
+        SUR["Suricata - 7 signatures"]
+        ZEEK["Zeek - llm_telemetry.zeek"]
     end
 
-    ATK --> WEB --> MON --> OLL
-    MON -. JSON audit log .-> WAZ
-    ATK -. HTTP / DNS .-> SUR
-    ATK -. HTTP / DNS .-> ZEK
-    SUR --> WAZ
-    ZEK --> WAZ
-    WAZ --> OSE
-    OSE --> OSD
-    WAZ --> WDB
+    subgraph L5["5 - SIEM AND SEARCH"]
+        IDX["Wazuh indexer<br/>wazuh-alerts-* :9201"]
+        PSIDX["promptshield-*<br/>LLM telemetry index"]
+        DASH["Dashboards - 12 panels :5602"]
+    end
+
+    subgraph L6["6 - ANALYST"]
+        HUNT["hunting/ - 11 queries"]
+        PB["playbooks/ - 5 IR playbooks"]
+    end
+
+    SIM -->|malicious prompt| MON
+    DS --> ING --> MON
+    WEBUI --> MON --> OLLAMA
+    MON -->|audit write| LOG
+    LOG --> PSIDX
+    LOG --> WAZUHR
+    WAZUHR --> IDX --> DASH
+    PSIDX --> DASH
+    SIGMA -.->|detection logic| PSIDX
+    SUR -.-> WIRE
+    ZEEK -.-> WIRE
+    DASH --> HUNT --> PB
+    PB -.->|new indicators, rules, fixtures| MON

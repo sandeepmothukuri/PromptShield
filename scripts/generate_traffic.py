@@ -1,4 +1,5 @@
 """Generate mixed benign + malicious traffic for dashboard demos."""
+
 from __future__ import annotations
 
 import argparse
@@ -32,7 +33,9 @@ def main() -> None:
     with httpx.Client(timeout=30) as c:
         while time.time() < end:
             row = random.choice(rows)
-            c.post(args.target, json={"prompt": row["prompt"], "user": f"demo-{random.randint(1,5)}"})
+            c.post(
+                args.target, json={"prompt": row["prompt"], "user": f"demo-{random.randint(1, 5)}"}
+            )
             time.sleep(1.0 / args.rps)
 
 

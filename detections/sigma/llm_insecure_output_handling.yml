@@ -1,0 +1,54 @@
+title: LLM Completion Containing Unsanitised Script Or Markup
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a010
+status: experimental
+description: |
+  Detects model completions that contain executable markup, inline event handlers, or
+  redirect primitives. Applications that render completions as HTML expose anyone who
+  views the conversation to script execution; applications that pipe completions into
+  a shell or SQL client expose the host.
+rationale: |
+  T1190 is mapped because the unsanitised completion is consumed by a public-facing
+  application component, which is the definition of exploiting that component's
+  weakness. The rule inspects the completion, not the prompt, so it fires on output
+  that reached the rendering layer.
+author: Sandeep Mothukuri
+date: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1190/
+  - https://atlas.mitre.org/techniques/AML.T0049
+logsource:
+  product: promptshield
+  service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
+detection:
+  selection_script:
+    completion|re:
+      - '(?i)<\s*script[^>]*>'
+      - '(?i)<\s*img[^>]+onerror\s*='
+      - '(?i)<\s*(svg|iframe|object|embed)[^>]+on(load|error|click)\s*='
+      - '(?i)javascript\s*:\s*[a-z]'
+  selection_injection:
+    completion|re:
+      - "(?i)(union\\s+select|;\\s*drop\\s+table|'\\s*or\\s+1\\s*=\\s*1)"
+      - '(?i)(\|\||;)\s*(curl|wget|nc|bash|sh)\s+'
+  condition: 1 of selection_*
+fields:
+  - '@timestamp'
+  - request_id
+  - session_id
+  - user
+  - model
+  - completion
+falsepositives:
+  - Legitimate front-end development conversations that include HTML or script snippets
+  - Security training material demonstrating XSS payloads
+level: high
+tags:
+  - attack.t1190
+  - attack.initial-access
+metadata:
+  owasp_llm_2025: LLM05
+  owasp_llm_2023: LLM02
+  atlas: AML.T0049
+  lab_scenario: simulations/insecure_output/xss_output.py
+  wazuh_rule_id: 100180

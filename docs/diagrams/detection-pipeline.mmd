@@ -1,0 +1,16 @@
+%% How one telemetry record fans out to three consumers.
+%% Source of truth for docs/img/detection-pipeline.svg.
+flowchart LR
+    PROXY["llm-monitor/proxy.py<br/>_build_event()"]
+
+    PROXY --> REC["monitor.json<br/>@timestamp / request_id / user<br/>attack_type / technique / severity<br/>classifier_score / verdict<br/>secrets_in_completion"]
+
+    REC --> WAZ["Wazuh<br/>decoder prematch ^{&quot;@timestamp&quot;:<br/>field name=&quot;attack_type&quot;<br/>rules 100100-100190"]
+    REC --> SIG["Sigma - 10 rules<br/>prompt|contains<br/>completion|re<br/>prompt_tokens|gte"]
+    REC --> OS["Dashboards + hunting<br/>attack_type.keyword<br/>technique.keyword<br/>date_histogram @timestamp"]
+
+    WAZ --> A1["alert 100110 level 10 T1059"]
+    WAZ --> A2["alert 100130 level 13 secret disclosure"]
+    WAZ --> A3["alert 100190 correlation"]
+    SIG --> A4["fires on datasets/ samples<br/>proven by tests/test_sigma_rules.py"]
+    OS --> A5["no panel on an absent field<br/>enforced by tests/test_dashboards.py"]

@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 620" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Detection pipeline and schema contract</title>
+  <desc id="desc">How one telemetry record fans out to Wazuh rules, Sigma rules and dashboards, with the fields each consumer reads.</desc>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect width="1360" height="620" fill="#f8fafc"/>
+  <text x="48" y="50" font-size="25" font-weight="700" fill="#0f172a">Detection pipeline</text>
+  <text x="48" y="76" font-size="14" fill="#475569">One record, three consumers. Field names are the contract; drift is caught in CI rather than in an empty dashboard panel.</text>
+  <line x1="48" y1="94" x2="1312" y2="94" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <rect x="48" y="118" width="330" height="384" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+  <text x="213" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">llm-monitor/proxy.py</text>
+  <text x="213" y="166" text-anchor="middle" font-size="11.5" fill="#475569">_build_event() &#8594; monitor.json</text>
+
+  <g font-size="11" font-family="monospace" fill="#0f766e">
+    <text x="72" y="196">"@timestamp"      ISO 8601 UTC</text>
+    <text x="72" y="214">"request_id"      correlation key</text>
+    <text x="72" y="232">"session_id"</text>
+    <text x="72" y="250">"user"</text>
+    <text x="72" y="268">"source_ip"</text>
+    <text x="72" y="286">"endpoint"</text>
+    <text x="72" y="304">"model" "provider"</text>
+    <text x="72" y="322">"prompt" "prompt_hash"</text>
+    <text x="72" y="340">"prompt_tokens"</text>
+    <text x="72" y="358">"classifier_score"</text>
+    <text x="72" y="376">"attack_type"</text>
+    <text x="72" y="394">"technique"  ATT&amp;CK ID</text>
+    <text x="72" y="412">"severity"</text>
+    <text x="72" y="430">"detection_reason"</text>
+    <text x="72" y="448">"obfuscated"</text>
+    <text x="72" y="466">"verdict" "blocked"</text>
+    <text x="72" y="484">"secrets_in_completion"</text>
+  </g>
+
+  <g font-size="13" fill="#0f172a">
+    <rect x="470" y="118" width="410" height="118" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="675" y="144" text-anchor="middle" font-weight="700">Wazuh</text>
+    <text x="675" y="164" text-anchor="middle" font-size="11.5" fill="#475569">detections/wazuh/decoders.xml + local_rules.xml</text>
+    <text x="486" y="188" font-size="11" font-family="monospace" fill="#6d28d9">prematch ^{"@timestamp": &#8594; JSON_Decoder</text>
+    <text x="486" y="206" font-size="11" font-family="monospace" fill="#6d28d9">&lt;field name="attack_type"&gt;</text>
+    <text x="486" y="224" font-size="11" font-family="monospace" fill="#6d28d9">&lt;field name="secrets_in_completion"&gt;</text>
+
+    <rect x="470" y="252" width="410" height="118" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="675" y="278" text-anchor="middle" font-weight="700">Sigma &#183; 10 rules</text>
+    <text x="675" y="298" text-anchor="middle" font-size="11.5" fill="#475569">detections/sigma/*.yml</text>
+    <text x="486" y="322" font-size="11" font-family="monospace" fill="#6d28d9">logsource product: promptshield</text>
+    <text x="486" y="340" font-size="11" font-family="monospace" fill="#6d28d9">prompt|contains &#183; completion|re</text>
+    <text x="486" y="358" font-size="11" font-family="monospace" fill="#6d28d9">prompt_tokens|gte &#183; attack_type</text>
+
+    <rect x="470" y="386" width="410" height="116" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="675" y="412" text-anchor="middle" font-weight="700">Dashboards and hunting</text>
+    <text x="675" y="432" text-anchor="middle" font-size="11.5" fill="#475569">dashboards/*.ndjson &#183; hunting/*.md</text>
+    <text x="486" y="456" font-size="11" font-family="monospace" fill="#c2410c">terms: attack_type.keyword</text>
+    <text x="486" y="474" font-size="11" font-family="monospace" fill="#c2410c">terms: technique.keyword</text>
+    <text x="486" y="492" font-size="11" font-family="monospace" fill="#c2410c">date_histogram: @timestamp</text>
+  </g>
+
+  <rect x="972" y="118" width="340" height="384" rx="8" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="1142" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Observed behaviour</text>
+
+  <g font-size="12" fill="#334155">
+    <rect x="992" y="166" width="300" height="56" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/>
+    <text x="1142" y="188" text-anchor="middle" font-weight="600" fill="#0f172a">Wazuh alert 100110</text>
+    <text x="1142" y="207" text-anchor="middle" font-size="10.5" fill="#64748b">level 10 &#183; T1059 &#183; groups promptshield</text>
+
+    <rect x="992" y="234" width="300" height="56" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/>
+    <text x="1142" y="256" text-anchor="middle" font-weight="600" fill="#0f172a">Alert 100130 &#183; level 13</text>
+    <text x="1142" y="275" text-anchor="middle" font-size="10.5" fill="#64748b">fires on secrets_in_completion, not prose</text>
+
+    <rect x="992" y="302" width="300" height="56" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/>
+    <text x="1142" y="324" text-anchor="middle" font-weight="600" fill="#0f172a">Alert 100190 &#183; correlation</text>
+    <text x="1142" y="343" text-anchor="middle" font-size="10.5" fill="#64748b">5 events / 5 min from one source_ip</text>
+
+    <rect x="992" y="370" width="300" height="56" rx="6" fill="#fff7ed" stroke="#fdba74"/>
+    <text x="1142" y="392" text-anchor="middle" font-weight="600" fill="#0f172a">Sigma fires on corpus samples</text>
+    <text x="1142" y="411" text-anchor="middle" font-size="10.5" fill="#64748b">proven by tests/test_sigma_rules.py</text>
+
+    <rect x="992" y="438" width="300" height="50" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="1142" y="459" text-anchor="middle" font-weight="600" fill="#15803d">No panel on an absent field</text>
+    <text x="1142" y="477" text-anchor="middle" font-size="10.5" fill="#64748b">tests/test_dashboards.py enforces this</text>
+  </g>
+
+  <g stroke-width="2" fill="none">
+    <path d="M378,180 L470,177" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M378,300 L470,311" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M378,420 L470,444" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M880,177 L972,194" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M880,220 L972,262" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M880,311 L972,330" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M880,340 L972,398" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M880,444 L972,463" stroke="#334155" marker-end="url(#a)"/>
+  </g>
+
+  <rect x="48" y="524" width="1264" height="68" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="68" y="550" font-size="12" font-weight="700" letter-spacing="1" fill="#334155">CONTRACT TESTS</text>
+  <text x="68" y="570" font-size="11.5" fill="#64748b">test_proxy_telemetry.py asserts the emitted record matches the documented schema field for field &#183; test_sigma_rules.py evaluates every rule against datasets/ &#183;</text>
+  <text x="68" y="586" font-size="11.5" fill="#64748b">test_attack_mappings.py asserts the telemetry technique, the Sigma tag and the Wazuh alert all name the same ATT&amp;CK ID.</text>
+</svg>

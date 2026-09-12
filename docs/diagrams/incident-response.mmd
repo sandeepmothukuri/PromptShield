@@ -1,0 +1,11 @@
+%% NIST SP 800-61 aligned phases. Source of truth for docs/img/incident-response.svg.
+flowchart LR
+    P1["Detection<br/>rule 100110-100190<br/>level 8-13"]
+    P2["Triage<br/>attack_type / verdict<br/>obfuscated"]
+    P3["Evidence<br/>audit JSON lines<br/>Wazuh alert export"]
+    P4["Containment<br/>block session<br/>rotate secrets"]
+    P5["Recovery<br/>old key rejected<br/>rule fires on fixture"]
+    P6["Post-incident<br/>datasets/ classifier.py<br/>Sigma playbook hunt"]
+
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6
+    P6 -.->|reduces the next incident| P1

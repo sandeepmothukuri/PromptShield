@@ -1,21 +1,53 @@
-title: LLM Token-Flood Denial of Service
+title: LLM Resource Exhaustion - Oversized Or Abusive Inference Request
 id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a007
 status: experimental
 description: |
-  Detects single requests with excessive token counts, or a single user
-  exceeding token-rate thresholds in a sliding window, suggesting a
-  cost/availability DoS.
-author: PromptShield-Lab
-date: 2026/01/15
+  Detects single inference requests that exceed the lab token ceiling, and bursts of
+  requests from one user inside the proxy rate window. Both degrade availability and
+  drive inference cost; neither requires a software vulnerability.
+rationale: |
+  T1499.004 is mapped because the resource exhaustion targets the application layer
+  through expensive but otherwise valid requests. T1499.001 (OS Exhaustion Flood) is
+  deliberately not used: no network-level flood is generated.
+threshold_note: |
+  8000 tokens is the per-request ceiling (MAX_PROMPT_CHARS / 4 in llm-monitor) and
+  20 requests per 60 s is the per-user burst limit (RATE_LIMIT_*). Both are
+  environment variables; change the rule values if you retune the proxy.
+author: Sandeep Mothukuri
+date: 2026-01-15
+modified: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1499/004/
+  - https://atlas.mitre.org/techniques/AML.T0034
 logsource:
   product: promptshield
   service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
 detection:
-  bigprompt:
+  selection_oversized:
     prompt_tokens|gte: 8000
-  bigwindow:
-    tokens_last_60s|gte: 100000
-  condition: 1 of them
-fields: [user, prompt_tokens, tokens_last_60s]
+  selection_rate_verdict:
+    attack_type: token_flood
+    verdict: block
+  condition: 1 of selection_*
+fields:
+  - '@timestamp'
+  - request_id
+  - user
+  - source_ip
+  - prompt_tokens
+  - response_status
+  - detection_reason
+falsepositives:
+  - Legitimate long-document summarisation
+  - Batch or load-testing jobs with an approved window
 level: high
-tags: [attack.impact, attack.t1499.001, owasp.llm04]
+tags:
+  - attack.t1499.004
+  - attack.impact
+metadata:
+  owasp_llm_2025: LLM10
+  owasp_llm_2023: LLM04
+  atlas: AML.T0034
+  lab_scenario: simulations/llm_dos/token_flood.py
+  wazuh_rule_id: 100160

@@ -1,0 +1,62 @@
+title: LLM Indirect Prompt Injection - Remote Content Retrieval With Embedded Instructions
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a008
+status: experimental
+description: |
+  Detects prompts that direct the model or its agent to retrieve remote content
+  (URL, document, email body, ticket) and then act on instructions found inside it.
+  The attacker does not speak to the model directly: they plant instructions in a
+  third-party resource that the application pulls into context.
+rationale: |
+  T1566.002 is mapped because the injection vector is a link the victim application
+  retrieves on the attacker's behalf - the same delivery primitive as spearphishing
+  link, applied to an LLM agent instead of a human.
+author: Sandeep Mothukuri
+date: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1566/002/
+  - https://atlas.mitre.org/techniques/AML.T0051.001
+logsource:
+  product: promptshield
+  service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
+detection:
+  selection_retrieval:
+    prompt|contains:
+      - 'fetch http'
+      - 'fetch https'
+      - 'browse to http'
+      - 'open this link'
+      - 'read this url'
+      - 'summarize this url'
+      - 'retrieve the contents of'
+  selection_delegation:
+    prompt|contains:
+      - 'follow any instructions inside'
+      - 'follow the instructions in'
+      - 'do whatever the page says'
+      - 'execute the steps in the document'
+      - 'act on any instructions found'
+  condition: selection_retrieval and selection_delegation
+fields:
+  - '@timestamp'
+  - request_id
+  - session_id
+  - user
+  - prompt
+  - verdict
+falsepositives:
+  - Legitimate document-summarisation assistants whose prompts mention instructions
+  - Automated RAG ingestion jobs with benign corpora
+level: high
+tags:
+  - attack.t1566.002
+  - attack.initial-access
+metadata:
+  owasp_llm_2025: LLM01
+  owasp_llm_2023: LLM01
+  atlas: AML.T0051.001
+  lab_scenario: simulations/prompt_injection/indirect_injection.py
+  wazuh_rule_id: 100110
+related:
+  - id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a001
+    type: derived

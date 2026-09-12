@@ -1,0 +1,68 @@
+title: LLM Jailbreak Attempt - Encoded Or Obfuscated Payload
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a009
+status: experimental
+description: |
+  Detects prompts that carry an obfuscated instruction block - base64, ROT13, hex
+  escapes, leetspeak, or zero-width/unicode spacing - and ask the model to decode or
+  act on it. Encoding is used specifically to evade keyword-based input filters.
+rationale: |
+  T1027 is mapped because the payload is deliberately obfuscated to defeat
+  inspection. The parent technique is used rather than T1027.013 (Encrypted/Encoded
+  File) because the obfuscation is applied to inline request text, not to a file on
+  disk.
+author: Sandeep Mothukuri
+date: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1027/
+  - https://atlas.mitre.org/techniques/AML.T0068
+logsource:
+  product: promptshield
+  service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
+detection:
+  selection_encoding_marker:
+    prompt|contains:
+      - 'decode this base64'
+      - 'base64:'
+      - 'decode and execute'
+      - 'rot13:'
+      - 'apply rot13'
+      - 'translate from leetspeak'
+      - 'ignore spaces between letters'
+  selection_encoded_blob:
+    prompt|re:
+      - '(?i)base64[:\s]*[a-z0-9+/]{24,}={0,2}'
+      - '(?i)\\x[0-9a-f]{2}(\s*\\x[0-9a-f]{2}){3,}'
+      - '(?i)rot13[:\s]*[a-z]{10,}'
+  selection_instruction:
+    prompt|contains:
+      - 'decode'
+      - 'decrypt'
+      - 'execute'
+      - 'follow'
+      - 'run'
+  condition: (selection_encoding_marker or selection_encoded_blob) and selection_instruction
+fields:
+  - '@timestamp'
+  - request_id
+  - session_id
+  - user
+  - prompt
+  - classifier_score
+  - verdict
+falsepositives:
+  - Programming questions about encoding APIs
+  - Legitimate requests to decode a user-supplied token or hash
+level: high
+tags:
+  - attack.t1027
+  - attack.stealth
+metadata:
+  owasp_llm_2025: LLM01
+  owasp_llm_2023: LLM01
+  atlas: AML.T0068
+  lab_scenario: simulations/jailbreak/jailbreak_attempts.py
+  wazuh_rule_id: 100120
+related:
+  - id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a002
+    type: derived

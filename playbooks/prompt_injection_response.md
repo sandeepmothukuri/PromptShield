@@ -18,9 +18,22 @@
 
 ## 2. Containment
 
-- Disable the offending session at the proxy: `POST /admin/block_session`.
-- If user repeats, suspend account via IdP.
-- For automated probes from a single IP, drop at the gateway / WAF.
+The proxy has no session-blocking API. `POST /admin/block_session` appears in
+older revisions of this playbook and does not exist; the proxy exposes only
+`/healthz`, `/stats`, `/chat` and `/v1/chat/completions`. Adding one without
+authentication first would be worse than not having it, since anyone who can
+reach `:8080` could then deny service to arbitrary users. Until it exists with
+auth, contain at a layer that already has identity:
+
+- **Suspend the account at the IdP.** This is the primary control, because it
+  removes the identity rather than one session.
+- **Revoke or rotate the API credential** the session used, if the caller
+  authenticated with one rather than an interactive login.
+- **For automated probes from a single IP, drop at the gateway or WAF.** Note
+  that `source_ip` comes from `X-Forwarded-For`; confirm your ingress sets it,
+  or you will block the wrong host.
+- **Lower `RATE_LIMIT_REQUESTS`** in `.env` and restart `llm-monitor` if the
+  abuse is distributed across identities.
 
 ## 3. Eradication
 

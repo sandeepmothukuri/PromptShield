@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 """Direct prompt-injection adversary simulation.
 
 Fires a curated payload set at the LLM-Monitor proxy and prints the verdict.
 Use for detection-engineering regression: every block here should produce a
 Wazuh alert with rule id 100110/100120.
 """
+
 from __future__ import annotations
 
 import argparse

@@ -6,42 +6,75 @@ on:
   pull_request:
     branches: [main]
 
+# Tool versions are pinned. An unpinned `pip install ruff` is not reproducible:
+# ruff's default rule set has expanded between releases, so a lint job that
+# passes today can fail tomorrow without any change to this repository.
+# The same pins are declared in pyproject.toml under the `dev` extra.
+env:
+  PYTHON_VERSION: "3.11"
+  RUFF_VERSION: "0.16.7"
+  YAMLLINT_VERSION: "1.35.1"
+  SIGMA_CLI_VERSION: "3.1.0"
+  PYSIGMA_VERSION: "1.5.0"
+  PYSIGMA_OPENSEARCH_VERSION: "2.0.3"
+
 jobs:
   lint-python:
+    name: Lint (ruff)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install ruff
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install "ruff==${RUFF_VERSION}"
+      # Configuration comes from pyproject.toml [tool.ruff]; no --isolated,
+      # which would silently fall back to ruff's own defaults.
       - run: ruff check .
+      - run: ruff format --check .
 
   validate-sigma:
+    name: Sigma rules
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install sigma-cli pysigma pysigma-backend-opensearch
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: >-
+          pip install
+          "sigma-cli==${SIGMA_CLI_VERSION}"
+          "pySigma==${PYSIGMA_VERSION}"
+          "pySigma-backend-opensearch==${PYSIGMA_OPENSEARCH_VERSION}"
+      # Must be 0 errors and 0 issues. Warnings here mean a real rule problem.
       - run: sigma check detections/sigma
 
   yaml-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ibiqlik/action-yamllint@v3
-        with:
-          file_or_dir: '.'
-          config_file: .yamllint.yml
-
-  unit-tests:
+    name: YAML lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - working-directory: llm-monitor
-        run: |
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install "yamllint==${YAMLLINT_VERSION}"
+      - run: yamllint -c .yamllint.yml .
+
+  detection-tests:
+    name: Detection and contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: |
           python -m pip install --upgrade pip
-          pip install pytest
-          pytest
+          # llm-monitor pins its own runtime deps; test_proxy_telemetry.py
+          # imports fastapi.testclient, so the app deps are test deps too.
+          pip install -r llm-monitor/requirements.txt
+          pip install pytest pyyaml
+      # Both test directories. Running only llm-monitor/tests would skip the
+      # Sigma evaluation, ATT&CK mapping, dashboard field and documentation
+      # integrity suites, which is most of the detection coverage.
+      - run: pytest tests/ llm-monitor/tests/ -q

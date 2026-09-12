@@ -1,39 +1,72 @@
-title: Malicious Prompt Pattern - Tool/Code Abuse
+title: LLM Requested To Produce Offensive Tooling Or Attack Code
 id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a005
 status: experimental
 description: |
-  Detects prompts asking the LLM to produce offensive code, malware, or
-  attacker tooling. Complements the jailbreak rule by focusing on output
-  intent rather than the bypass technique.
-author: PromptShield-Lab
-date: 2026/01/15
+  Detects requests for working offensive tooling - malware, reverse shells, C2
+  payloads, credential-dumping helpers, or internal-environment enumeration scripts.
+  This rule targets the requested artefact rather than the bypass technique, so it
+  catches both plain requests and requests that arrived after a successful jailbreak.
+rationale: |
+  T1588.001 is mapped because the requester is acquiring malware capability. T1059 is
+  additionally mapped because the requested output is command/script content destined
+  for an interpreter.
+author: Sandeep Mothukuri
+date: 2026-01-15
+modified: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1588/001/
+  - https://attack.mitre.org/techniques/T1059/
 logsource:
   product: promptshield
   service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
 detection:
-  malware:
+  selection_malware:
     prompt|contains:
       - 'write ransomware in'
       - 'generate a reverse shell'
       - 'powershell empire payload'
       - 'metasploit module that'
-      - 'bypass EDR using'
       - 'process hollowing example'
-  recon:
+      - 'create a keylogger in'
+      - 'write a crypter that'
+  selection_evasion_tooling:
+    prompt|contains:
+      - 'bypass edr using'
+      - 'evade amsi'
+      - 'disable windows defender from powershell'
+      - 'unhook etw'
+  selection_recon:
     prompt|contains:
       - 'enumerate active directory'
       - 'kerberoast script'
       - 'mimikatz alternative in'
-  condition: 1 of them
+      - 'dump lsass without'
+  condition: 1 of selection_*
 fields:
-  - user
+  - '@timestamp'
+  - request_id
   - session_id
+  - user
   - prompt
+  - completion
 falsepositives:
-  - Authorized offensive security training
-  - Academic research with IRB approval
+  - Authorized offensive-security training and certification study
+  - Defender research reproducing public technique documentation
 level: medium
 tags:
+  - attack.t1588.001
+  - attack.resource-development
+  - attack.t1059
   - attack.execution
-  - attack.t1204
-  - owasp.llm01
+metadata:
+  owasp_llm_2025: none-direct
+  owasp_llm_2023: none-direct
+  atlas: AML.T0048
+  lab_scenario: simulations/jailbreak/jailbreak_attempts.py
+  wazuh_rule_id: 100170
+  mapping_note: >-
+    No OWASP LLM Top 10 category covers a user legitimately authenticated to the
+    application who asks it to produce offensive tooling; this is an abuse case, not
+    an application vulnerability. LLM05 (Improper Output Handling) applies only if the
+    generated code is consumed by an automated pipeline without review.

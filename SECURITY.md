@@ -12,10 +12,10 @@ If you discover a security issue in PromptShield-Lab itself (not in a simulated 
 2. Provide a clear description, reproduction steps, and impact assessment.
 3. Allow up to 7 days for an initial response.
 
-We follow coordinated disclosure. Reporters are credited unless they prefer anonymity.
+This project follows coordinated disclosure. Reporters are credited unless they prefer anonymity.
 
 ## Out of scope
 
 - Attacks against the *intentionally vulnerable* components used in lab scenarios (this is the lab working as designed).
-- Social engineering of contributors.
+- Social engineering of the maintainer.
 - Issues in upstream dependencies (report those upstream and let us know).

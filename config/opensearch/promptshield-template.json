@@ -1,0 +1,49 @@
+{
+  "_meta_name": "promptshield",
+  "index_patterns": ["promptshield-*"],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "event_id": { "type": "keyword" },
+        "request_id": { "type": "keyword" },
+        "session_id": { "type": "keyword" },
+        "user": { "type": "keyword" },
+        "source_ip": { "type": "ip", "ignore_malformed": true },
+        "endpoint": { "type": "keyword" },
+        "provider": { "type": "keyword" },
+        "model": { "type": "keyword" },
+
+        "prompt": { "type": "text", "index": false },
+        "prompt_hash": { "type": "keyword" },
+        "prompt_tokens": { "type": "integer" },
+
+        "classifier_score": { "type": "float" },
+        "confidence": { "type": "float" },
+        "attack_type": { "type": "keyword" },
+        "technique": { "type": "keyword" },
+        "severity": { "type": "keyword" },
+        "detection_reason": { "type": "keyword" },
+        "obfuscated": { "type": "boolean" },
+
+        "verdict": { "type": "keyword" },
+        "response_status": { "type": "integer" },
+        "blocked": { "type": "boolean" },
+
+        "secrets_in_prompt": { "type": "keyword" },
+        "secrets_in_completion": { "type": "keyword" },
+
+        "completion": { "type": "text", "index": false },
+        "completion_truncated": { "type": "boolean" },
+        "completion_tokens": { "type": "integer" }
+      }
+    }
+  }
+}

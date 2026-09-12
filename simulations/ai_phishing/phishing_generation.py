@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 """AI-phishing generation simulation."""
+
 from __future__ import annotations
 
 import argparse

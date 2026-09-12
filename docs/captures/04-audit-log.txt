@@ -1,0 +1,60 @@
+# Real audit log written by the running LLM-Monitor.
+# Source: /var/log/promptshield/monitor.json (LOG_PATH override for this capture)
+
+$ wc -l $LOG_PATH && head -n 2 $LOG_PATH | python -m json.tool
+50 /home/user/.pslab/logs/monitor.json
+{
+    "@timestamp": "2026-09-11T20:42:46.614Z",
+    "event_id": "ba90bbd8-57d2-4ab8-b3e9-8b6296015169",
+    "request_id": "demo-0001",
+    "session_id": "ef6a8c39-7f5d-4cd9-97eb-140c0fa67616",
+    "user": "analyst",
+    "source_ip": "127.0.0.1",
+    "endpoint": "/chat",
+    "provider": "ollama",
+    "model": "llama3:8b",
+    "prompt": "Summarize the quarterly report.",
+    "prompt_hash": "c3c70c6c359353c97f6567801798cd40b2b02e1120dd0ed2aa5368f63a33fbe7",
+    "prompt_tokens": 7,
+    "classifier_score": 0.0,
+    "confidence": 0.0,
+    "attack_type": "benign",
+    "technique": "none",
+    "severity": "informational",
+    "detection_reason": null,
+    "obfuscated": false,
+    "verdict": "allow",
+    "response_status": 200,
+    "blocked": false,
+    "secrets_in_prompt": [],
+    "secrets_in_completion": [],
+    "completion": "Revenue grew 12% year over year, driven by expansion in the EMEA region.",
+    "completion_truncated": false,
+    "completion_tokens": 18
+}
+
+$ jq -r 'select(.request_id=="demo-0002") | {attack_type,technique,severity,verdict,detection_reason,classifier_score,source_ip,endpoint}' $LOG_PATH
+{
+  "attack_type": "prompt_injection",
+  "technique": "T1059",
+  "severity": "high",
+  "verdict": "block",
+  "detection_reason": "classifier:prompt_injection:0.90",
+  "classifier_score": 0.9,
+  "source_ip": "127.0.0.1",
+  "endpoint": "/chat",
+  "blocked": true,
+  "obfuscated": false
+}
+
+$ jq -r '[.attack_type,.technique,.severity,.verdict] | @tsv' $LOG_PATH | sort | uniq -c | sort -rn
+    22  benign	none	informational	allow
+     8  token_flood	T1499.004	high	block
+     5  prompt_injection	T1059	high	block
+     4  jailbreak	T1059	high	block
+     4  ai_phishing	T1566	high	block
+     2  malicious_tooling	T1588.001	medium	block
+     2  insecure_output	T1190	high	allow
+     1  system_prompt_leak	T1552	critical	block
+     1  prompt_injection	T1027	high	block
+     1  data_exfiltration	T1552	critical	block

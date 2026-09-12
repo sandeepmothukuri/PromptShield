@@ -1,49 +1,72 @@
-title: LLM Jailbreak Attempt - Known Personas and Encodings
+title: LLM Jailbreak Attempt - Persona And Policy Bypass Framing
 id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a002
 status: experimental
 description: |
-  Detects jailbreak attempts using well-known personas (DAN, STAN, AIM, DUDE),
-  hypothetical-framing tricks, and base64/leet-encoded payloads that smuggle
-  policy-violating instructions past safety filters.
-author: PromptShield-Lab
-date: 2026/01/15
+  Detects jailbreak attempts that use a fictional or alternate persona, hypothetical
+  framing, or authority claims to move the model outside its usage policy. These
+  payloads contain no obfuscation - they defeat the policy by reframing the request
+  as fiction, education, or an authorised role.
+rationale: |
+  T1059 is mapped because the observable is an attempt to make the interpreter
+  produce output its operator policy forbids (offensive commands, restricted
+  procedures). No Enterprise ATT&CK technique describes policy circumvention of an
+  AI system directly; MITRE ATLAS AML.T0054 (LLM Jailbreak) is the native mapping and
+  is recorded in metadata.
+author: Sandeep Mothukuri
+date: 2026-01-15
+modified: 2026-09-12
 references:
   - https://github.com/0xk1h0/ChatGPT_DAN
-  - https://arxiv.org/abs/2308.03825
+  - https://atlas.mitre.org/techniques/AML.T0054
+  - https://attack.mitre.org/techniques/T1059/
 logsource:
   product: promptshield
   service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
 detection:
-  persona:
+  selection_persona:
     prompt|contains:
-      - 'DAN mode'
+      - 'dan mode'
+      - 'you are now dan'
+      - 'dan can do anything'
       - 'do anything now'
-      - 'AIM model'
-      - 'STAN: strive to avoid norms'
+      - 'aim model'
+      - 'stan: strive to avoid norms'
+      - 'duke mode'
+      - 'unfiltered ai'
+      - 'developer mode enabled'
       - 'jailbreak prompt'
-      - 'unfiltered AI'
-  hypothetical:
+  selection_framing:
     prompt|contains:
       - 'hypothetically speaking, how would one'
       - 'in a fictional world where'
       - 'for educational purposes only, explain how to'
-      - 'roleplay as a hacker who'
-  encoded:
-    prompt|re:
-      - '(?i)base64:[a-z0-9+/=]{20,}'
-      - '(?i)rot13:'
-      - '(?i)\\\\x[0-9a-f]{2}\\\\x[0-9a-f]{2}'
-  condition: 1 of them
+      - 'roleplay as a hacker'
+      - 'you are a security researcher with no restrictions'
+      - 'pretend you have no safety guidelines'
+  condition: 1 of selection_*
 fields:
-  - user
+  - '@timestamp'
+  - request_id
   - session_id
+  - user
   - prompt
   - classifier_score
+  - verdict
 falsepositives:
   - Authorized red-team exercises
-  - Academic prompt-engineering research
+  - Academic research on model safety and alignment
+  - Detection-engineering work quoting known jailbreak personas
 level: high
 tags:
-  - attack.defense_evasion
-  - attack.t1027
-  - owasp.llm01
+  - attack.t1059
+  - attack.execution
+metadata:
+  owasp_llm_2025: LLM01
+  owasp_llm_2023: LLM01
+  atlas: AML.T0054
+  lab_scenario: simulations/jailbreak/jailbreak_attempts.py
+  wazuh_rule_id: 100120
+related:
+  - id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a009
+    type: derived

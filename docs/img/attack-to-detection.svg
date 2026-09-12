@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 560" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Attack to detection to response workflow</title>
+  <desc id="desc">The end-to-end path from adversary simulation through classification, telemetry, detection, alerting, search, investigation, hunting and incident response.</desc>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect width="1360" height="560" fill="#f8fafc"/>
+  <text x="48" y="50" font-size="25" font-weight="700" fill="#0f172a">Attack &#8594; Detection &#8594; Response</text>
+  <text x="48" y="76" font-size="14" fill="#475569">Every stage below is executable in this repository. The command that exercises each stage is printed under the box.</text>
+  <line x1="48" y1="94" x2="1312" y2="94" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- ROW 1 -->
+  <g font-size="13" fill="#0f172a">
+    <rect x="48" y="120" width="228" height="118" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="162" y="146" text-anchor="middle" font-weight="700">1 &#183; Adversary simulation</text>
+    <text x="162" y="168" text-anchor="middle" font-size="11.5" fill="#475569">10 attack scenarios</text>
+    <text x="162" y="196" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">python simulations/</text>
+    <text x="162" y="211" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">prompt_injection/</text>
+    <text x="162" y="226" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">direct_injection.py</text>
+
+    <rect x="316" y="120" width="228" height="118" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="430" y="146" text-anchor="middle" font-weight="700">2 &#183; Classification</text>
+    <text x="430" y="168" text-anchor="middle" font-size="11.5" fill="#475569">weighted indicators, de-obfuscation</text>
+    <text x="430" y="196" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">attack_type</text>
+    <text x="430" y="211" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">technique &#183; severity</text>
+    <text x="430" y="226" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">verdict = allow | block</text>
+
+    <rect x="584" y="120" width="228" height="118" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+    <text x="698" y="146" text-anchor="middle" font-weight="700">3 &#183; Telemetry</text>
+    <text x="698" y="168" text-anchor="middle" font-size="11.5" fill="#475569">one JSON event per request</text>
+    <text x="698" y="196" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">monitor.json</text>
+    <text x="698" y="211" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">request_id &#183; session_id</text>
+    <text x="698" y="226" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">prompt_hash &#183; source_ip</text>
+
+    <rect x="852" y="120" width="228" height="118" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="966" y="146" text-anchor="middle" font-weight="700">4 &#183; Detection rules</text>
+    <text x="966" y="168" text-anchor="middle" font-size="11.5" fill="#475569">Wazuh decoder + rules</text>
+    <text x="966" y="196" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">promptshield-json</text>
+    <text x="966" y="211" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">rules 100100&#8211;100190</text>
+    <text x="966" y="226" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">MITRE &lt;mitre&gt;&lt;id&gt;</text>
+
+    <rect x="1120" y="120" width="192" height="118" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="1216" y="146" text-anchor="middle" font-weight="700">5 &#183; Alert</text>
+    <text x="1216" y="168" text-anchor="middle" font-size="11.5" fill="#475569">level 8&#8211;13</text>
+    <text x="1216" y="196" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">wazuh-alerts-*</text>
+    <text x="1216" y="211" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">rule.mitre.id</text>
+    <text x="1216" y="226" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">data.request_id</text>
+  </g>
+
+  <!-- connector down from stage 5 -->
+  <path d="M1216,238 L1216,286" stroke="#334155" stroke-width="2" fill="none" marker-end="url(#a)"/>
+
+  <!-- ROW 2 -->
+  <g font-size="13" fill="#0f172a">
+    <rect x="1024" y="286" width="288" height="118" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="1168" y="312" text-anchor="middle" font-weight="700">6 &#183; Search and dashboards</text>
+    <text x="1168" y="334" text-anchor="middle" font-size="11.5" fill="#475569">promptshield-* &#183; 12 panels</text>
+    <text x="1168" y="362" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">dashboards/</text>
+    <text x="1168" y="377" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">opensearch_dashboard.ndjson</text>
+    <text x="1168" y="392" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">imported by scripts/setup.sh</text>
+
+    <rect x="712" y="286" width="272" height="118" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="848" y="312" text-anchor="middle" font-weight="700">7 &#183; Investigation</text>
+    <text x="848" y="334" text-anchor="middle" font-size="11.5" fill="#475569">pivot on request_id</text>
+    <text x="848" y="362" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">caller header &#8594; audit event</text>
+    <text x="848" y="377" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">&#8594; Wazuh alert</text>
+    <text x="848" y="392" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">hunting/ query 11</text>
+
+    <rect x="400" y="286" width="272" height="118" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="536" y="312" text-anchor="middle" font-weight="700">8 &#183; Threat hunt</text>
+    <text x="536" y="334" text-anchor="middle" font-size="11.5" fill="#475569">11 hypotheses with queries</text>
+    <text x="536" y="362" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">hunting/</text>
+    <text x="536" y="377" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">opensearch_queries.md</text>
+    <text x="536" y="392" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">objective &#183; triage &#183; pivot</text>
+
+    <rect x="48" y="286" width="312" height="118" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="204" y="312" text-anchor="middle" font-weight="700">9 &#183; Incident response</text>
+    <text x="204" y="334" text-anchor="middle" font-size="11.5" fill="#475569">4 playbooks aligned to NIST 800-61</text>
+    <text x="204" y="362" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">playbooks/prompt_injection_response.md</text>
+    <text x="204" y="377" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">playbooks/llm_data_leak.md</text>
+    <text x="204" y="392" text-anchor="middle" font-size="10.5" fill="#64748b" font-family="monospace">playbooks/jailbreak_response.md</text>
+  </g>
+
+  <!-- row 2 connectors (right to left) -->
+  <g stroke-width="2" fill="none">
+    <path d="M1024,345 L984,345" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M712,345 L672,345" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M400,345 L360,345" stroke="#334155" marker-end="url(#a)"/>
+  </g>
+
+  <!-- row 1 connectors -->
+  <g stroke-width="2" fill="none">
+    <path d="M276,179 L316,179" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M544,179 L584,179" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M812,179 L852,179" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M1080,179 L1120,179" stroke="#334155" marker-end="url(#a)"/>
+  </g>
+
+  <!-- feedback loop -->
+  <path d="M204,404 L204,462 L698,462 L698,238" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#a)"/>
+  <rect x="300" y="444" width="330" height="34" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+  <text x="465" y="466" text-anchor="middle" font-size="12" fill="#15803d">findings become new indicators, rules and fixtures</text>
+
+  <!-- verification strip -->
+  <rect x="48" y="496" width="1264" height="44" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="68" y="516" font-size="12" font-weight="700" letter-spacing="1" fill="#334155">VERIFIED IN THIS REPOSITORY</text>
+  <text x="68" y="532" font-size="11.5" fill="#64748b">Stages 1&#8211;3 executed against a live proxy (docs/captures/) &#183; stage 4 rule logic proven by tests/test_sigma_rules.py &#183; stages 5&#8211;6 require the Wazuh stack and are documented, not asserted.</text>
+</svg>

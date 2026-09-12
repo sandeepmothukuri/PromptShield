@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 600" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Incident response lifecycle for LLM telemetry</title>
+  <desc id="desc">The NIST SP 800-61 aligned response phases used by the playbooks, with the artefacts each phase consumes.</desc>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect width="1360" height="600" fill="#f8fafc"/>
+  <text x="48" y="50" font-size="25" font-weight="700" fill="#0f172a">Incident response</text>
+  <text x="48" y="76" font-size="14" fill="#475569">Phase structure from NIST SP 800-61. Artefacts are the fields this repository actually produces.</text>
+  <line x1="48" y1="94" x2="1312" y2="94" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- phase boxes -->
+  <g font-size="13" fill="#0f172a">
+    <rect x="48" y="120" width="238" height="184" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="167" y="146" text-anchor="middle" font-weight="700">Detection</text>
+    <text x="167" y="168" text-anchor="middle" font-size="11" fill="#475569">trigger and severity</text>
+    <line x1="68" y1="180" x2="266" y2="180" stroke="#fdba74"/>
+    <text x="68" y="200" font-size="10.5" font-family="monospace" fill="#9a3412">rule.id 100110-100190</text>
+    <text x="68" y="218" font-size="10.5" font-family="monospace" fill="#9a3412">rule.level 8-13</text>
+    <text x="68" y="236" font-size="10.5" font-family="monospace" fill="#9a3412">severity: critical</text>
+    <text x="68" y="262" font-size="10.5" fill="#64748b">Owner: Tier-1 analyst</text>
+    <text x="68" y="280" font-size="10.5" fill="#64748b">Clock starts here</text>
+
+    <rect x="306" y="120" width="238" height="184" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="425" y="146" text-anchor="middle" font-weight="700">Triage</text>
+    <text x="425" y="168" text-anchor="middle" font-size="11" fill="#475569">classify the intent</text>
+    <line x1="326" y1="180" x2="524" y2="180" stroke="#c4b5fd"/>
+    <text x="326" y="200" font-size="10.5" font-family="monospace" fill="#6d28d9">attack_type</text>
+    <text x="326" y="218" font-size="10.5" font-family="monospace" fill="#6d28d9">verdict: allow|block</text>
+    <text x="326" y="236" font-size="10.5" font-family="monospace" fill="#6d28d9">obfuscated</text>
+    <text x="326" y="262" font-size="10.5" fill="#64748b">opportunistic / targeted /</text>
+    <text x="326" y="280" font-size="10.5" fill="#64748b">automated probe</text>
+
+    <rect x="564" y="120" width="238" height="184" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+    <text x="683" y="146" text-anchor="middle" font-weight="700">Evidence</text>
+    <text x="683" y="168" text-anchor="middle" font-size="11" fill="#475569">preserve before it rotates</text>
+    <line x1="584" y1="180" x2="782" y2="180" stroke="#5eead4"/>
+    <text x="584" y="200" font-size="10.5" font-family="monospace" fill="#0f766e">audit JSON lines</text>
+    <text x="584" y="218" font-size="10.5" font-family="monospace" fill="#0f766e">Wazuh alert export</text>
+    <text x="584" y="236" font-size="10.5" font-family="monospace" fill="#0f766e">prompt_hash chain</text>
+    <text x="584" y="262" font-size="10.5" fill="#64748b">Do not re-run the payload</text>
+    <text x="584" y="280" font-size="10.5" fill="#64748b">against production</text>
+
+    <rect x="822" y="120" width="238" height="184" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+    <text x="941" y="146" text-anchor="middle" font-weight="700">Containment</text>
+    <text x="941" y="168" text-anchor="middle" font-size="11" fill="#475569">stop the bleeding first</text>
+    <line x1="842" y1="180" x2="1040" y2="180" stroke="#fca5a5"/>
+    <text x="842" y="200" font-size="10.5" font-family="monospace" fill="#b91c1c">block session_id</text>
+    <text x="842" y="218" font-size="10.5" font-family="monospace" fill="#b91c1c">rotate leaked secrets</text>
+    <text x="842" y="236" font-size="10.5" font-family="monospace" fill="#b91c1c">drop source_ip at WAF</text>
+    <text x="842" y="262" font-size="10.5" fill="#64748b">Rotation precedes</text>
+    <text x="842" y="280" font-size="10.5" fill="#64748b">forensic curiosity</text>
+
+    <rect x="1080" y="120" width="232" height="184" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="1196" y="146" text-anchor="middle" font-weight="700">Recovery</text>
+    <text x="1196" y="168" text-anchor="middle" font-size="11" fill="#475569">verify, then restore</text>
+    <line x1="1100" y1="180" x2="1292" y2="180" stroke="#86efac"/>
+    <text x="1100" y="200" font-size="10.5" font-family="monospace" fill="#15803d">old key rejected</text>
+    <text x="1100" y="218" font-size="10.5" font-family="monospace" fill="#15803d">corpus re-scanned</text>
+    <text x="1100" y="236" font-size="10.5" font-family="monospace" fill="#15803d">rule fires on fixture</text>
+    <text x="1100" y="262" font-size="10.5" fill="#64748b">Lift the block only</text>
+    <text x="1100" y="280" font-size="10.5" fill="#64748b">after root cause</text>
+  </g>
+
+  <g stroke-width="2" fill="none">
+    <path d="M286,212 L306,212" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M544,212 L564,212" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M802,212 L822,212" stroke="#334155" marker-end="url(#a)"/>
+    <path d="M1060,212 L1080,212" stroke="#334155" marker-end="url(#a)"/>
+  </g>
+
+  <!-- post incident -->
+  <rect x="48" y="330" width="1264" height="112" rx="8" fill="#ffffff" stroke="#334155" stroke-width="2"/>
+  <text x="68" y="358" font-size="14" font-weight="700" fill="#0f172a">Post-incident activity</text>
+  <text x="68" y="380" font-size="11.5" fill="#475569">The only phase that reduces the next incident. Each output is a repository change, not a slide.</text>
+  <g font-size="11.5" fill="#334155">
+    <rect x="68" y="392" width="290" height="38" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="213" y="416" text-anchor="middle">payload added to <tspan font-family="monospace">datasets/</tspan></text>
+    <rect x="372" y="392" width="290" height="38" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="517" y="416" text-anchor="middle">indicator added to <tspan font-family="monospace">classifier.py</tspan></text>
+    <rect x="676" y="392" width="290" height="38" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="821" y="416" text-anchor="middle">Sigma rule added or tuned</text>
+    <rect x="980" y="392" width="312" height="38" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="1136" y="416" text-anchor="middle">playbook and hunt updated</text>
+  </g>
+
+  <!-- playbook index -->
+  <rect x="48" y="466" width="1264" height="112" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+  <text x="68" y="492" font-size="12" font-weight="700" letter-spacing="1" fill="#334155">PLAYBOOK INDEX</text>
+  <g font-size="11.5" fill="#334155">
+    <text x="68" y="516" font-family="monospace" fill="#0f766e">playbooks/prompt_injection_response.md</text>
+    <text x="392" y="516">Wazuh 100110 / 100120 &#183; T1059, T1566.002</text>
+
+    <text x="68" y="538" font-family="monospace" fill="#0f766e">playbooks/llm_data_leak.md</text>
+    <text x="392" y="538">Wazuh 100130 / 100150 &#183; T1552 &#183; rotation first</text>
+
+    <text x="68" y="560" font-family="monospace" fill="#0f766e">playbooks/jailbreak_response.md</text>
+    <text x="392" y="560">Wazuh 100120 &#183; T1059, T1027 &#183; graduated response</text>
+
+    <text x="760" y="516" font-family="monospace" fill="#0f766e">playbooks/ai_phishing_response.md</text>
+    <text x="1084" y="516">Wazuh 100140 &#183; T1566</text>
+
+    <text x="760" y="538" font-family="monospace" fill="#0f766e">playbooks/_template_postmortem.md</text>
+    <text x="1084" y="538">referenced by every playbook</text>
+
+    <text x="760" y="560" font-family="monospace" fill="#0f766e">playbooks/llm_dos_response.md</text>
+    <text x="1084" y="560">Wazuh 100160 &#183; T1499.004</text>
+  </g>
+</svg>

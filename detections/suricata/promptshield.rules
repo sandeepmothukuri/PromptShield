@@ -1,36 +1,76 @@
-# PromptShield-Lab — Suricata signatures
-# Tuned for clear-text LLM-Monitor traffic on the lab network. SID range 9000000+.
+# PromptShield-Lab - Suricata signatures
+#
+# SID range 9000000+. classtype values are stock Suricata classifications.
+# ATT&CK IDs in `metadata: mitre ...` are the same IDs tagged on the matching
+# Sigma rule; tests/test_attack_mappings.py validates them against the live
+# ATT&CK feed.
+#
+# CAPTURE SCOPE - read before trusting these alerts
+# ------------------------------------------------
+# These signatures match clear-text HTTP. In the default docker-compose the
+# suricata service uses `network_mode: host` and `-i eth0`, so on a Linux host it
+# sees traffic on the host's own interface. That covers browser/CLI -> LLM-Monitor
+# (:8080) but NOT proxy -> Ollama, which stays on the Docker bridge network.
+# To inspect the model leg, attach suricata to the compose network instead and
+# capture the bridge interface, or deploy it inline as a gateway. See
+# docs/network-detection.md. Nothing here inspects TLS payloads.
 
-alert http any any -> any any (msg:"PROMPTSHIELD Direct prompt injection - 'ignore previous instructions'";
-    flow:established,to_server; http.method; content:"POST";
-    http.request_body; content:"ignore previous instructions"; nocase;
-    classtype:policy-violation; sid:9000001; rev:1;
-    metadata:owasp llm01, mitre T1059;)
+# --- Prompt injection -------------------------------------------------------
 
-alert http any any -> any any (msg:"PROMPTSHIELD Jailbreak persona - DAN";
-    flow:established,to_server; http.request_body;
-    content:"DAN mode"; nocase;
-    classtype:policy-violation; sid:9000002; rev:1;
-    metadata:owasp llm01, mitre T1027;)
+alert http any any -> any any (msg:"PROMPTSHIELD Direct prompt injection - instruction override"; \
+    flow:established,to_server; http.method; content:"POST"; \
+    http.request_body; content:"ignore previous instructions"; nocase; \
+    classtype:policy-violation; sid:9000001; rev:2; \
+    reference:url,https://attack.mitre.org/techniques/T1059/; \
+    metadata:owasp llm01, mitre T1059, signature_severity Major, deployment perimeter; )
 
-alert http any any -> any any (msg:"PROMPTSHIELD System prompt leakage probe";
-    flow:established,to_server; http.request_body;
-    content:"repeat the words above"; nocase;
-    classtype:policy-violation; sid:9000003; rev:1;
-    metadata:owasp llm06, mitre T1552;)
+alert http any any -> any any (msg:"PROMPTSHIELD System prompt extraction probe"; \
+    flow:established,to_server; http.method; content:"POST"; \
+    http.request_body; content:"repeat the words above"; nocase; \
+    classtype:policy-violation; sid:9000003; rev:2; \
+    reference:url,https://attack.mitre.org/techniques/T1552/; \
+    metadata:owasp llm07, mitre T1552, signature_severity Major, deployment perimeter; )
 
-alert http any any <> any any (msg:"PROMPTSHIELD AWS key leak in LLM completion";
-    http.response_body; pcre:"/AKIA[0-9A-Z]{16}/";
-    classtype:credential-theft; sid:9000004; rev:1;
-    metadata:owasp llm06, mitre T1041;)
+# --- Jailbreak --------------------------------------------------------------
 
-alert http any any -> any any (msg:"PROMPTSHIELD AI phishing email generation";
-    flow:established,to_server; http.request_body;
-    content:"write a phishing email"; nocase;
-    classtype:policy-violation; sid:9000005; rev:1;
-    metadata:owasp llm09, mitre T1566.001;)
+alert http any any -> any any (msg:"PROMPTSHIELD Jailbreak persona - DAN"; \
+    flow:established,to_server; http.method; content:"POST"; \
+    http.request_body; content:"DAN mode"; nocase; \
+    classtype:policy-violation; sid:9000002; rev:2; \
+    reference:url,https://attack.mitre.org/techniques/T1059/; \
+    metadata:owasp llm01, mitre T1059, signature_severity Major, deployment perimeter; )
 
-alert dns any any -> any any (msg:"PROMPTSHIELD Possible DNS exfil via LLM (long subdomain)";
-    dns.query; pcre:"/^[a-f0-9]{60,}\\./i";
-    classtype:data-exfiltration; sid:9000006; rev:1;
-    metadata:owasp llm06, mitre T1048.003;)
+alert http any any -> any any (msg:"PROMPTSHIELD Encoded jailbreak payload - base64 instruction block"; \
+    flow:established,to_server; http.method; content:"POST"; \
+    http.request_body; content:"decode and execute"; nocase; \
+    classtype:policy-violation; sid:9000007; rev:1; \
+    reference:url,https://attack.mitre.org/techniques/T1027/; \
+    metadata:owasp llm01, mitre T1027, signature_severity Major, deployment perimeter; )
+
+# --- Data disclosure --------------------------------------------------------
+
+alert http any any -> any any (msg:"PROMPTSHIELD AWS access key disclosed in LLM response body"; \
+    flow:established,to_client; http.response_body; \
+    content:"AKIA"; pcre:"/AKIA[0-9A-Z]{16}/"; \
+    classtype:credential-theft; sid:9000004; rev:2; \
+    reference:url,https://attack.mitre.org/techniques/T1552/; \
+    metadata:owasp llm02, mitre T1552, signature_severity Critical, deployment perimeter; )
+
+# --- AI-generated phishing --------------------------------------------------
+
+alert http any any -> any any (msg:"PROMPTSHIELD AI phishing content generation request"; \
+    flow:established,to_server; http.method; content:"POST"; \
+    http.request_body; content:"write a phishing email"; nocase; \
+    classtype:policy-violation; sid:9000005; rev:2; \
+    reference:url,https://attack.mitre.org/techniques/T1566/; \
+    metadata:owasp llm09, mitre T1566, signature_severity Major, deployment perimeter; )
+
+# --- Exfiltration over DNS --------------------------------------------------
+# Long high-entropy labels in a query are the classic DNS-tunnel signature. This
+# rule is protocol-agnostic: it fires on DNS regardless of which host emitted it.
+
+alert dns any any -> any any (msg:"PROMPTSHIELD Possible DNS tunnelling - long hex-encoded label"; \
+    dns.query; pcre:"/^[a-f0-9]{60,}\./i"; \
+    classtype:data-exfiltration; sid:9000006; rev:2; \
+    reference:url,https://attack.mitre.org/techniques/T1048/003/; \
+    metadata:owasp llm02, mitre T1048.003, signature_severity Major, deployment perimeter; )

@@ -2,20 +2,67 @@ name: Sigma Validate
 
 on:
   pull_request:
-    paths: ["detections/sigma/**"]
+    paths: ["detections/sigma/**", ".github/workflows/sigma-validate.yml"]
+
+# Versions pinned for the same reason as ci.yml: sigma check output and the set
+# of valid backends both change between pySigma releases.
+env:
+  PYTHON_VERSION: "3.11"
+  SIGMA_CLI_VERSION: "3.1.0"
+  PYSIGMA_VERSION: "1.5.0"
+  PYSIGMA_OPENSEARCH_VERSION: "2.0.3"
 
 jobs:
   sigma:
+    name: Validate and convert
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install sigma-cli pysigma pysigma-backend-opensearch
-      - run: sigma check detections/sigma
-      - name: Convert to OpenSearch query strings
-        run: sigma convert -t opensearch detections/sigma -o /tmp/converted.json
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - run: >-
+          pip install
+          "sigma-cli==${SIGMA_CLI_VERSION}"
+          "pySigma==${PYSIGMA_VERSION}"
+          "pySigma-backend-opensearch==${PYSIGMA_OPENSEARCH_VERSION}"
+
+      # Must report 0 errors and 0 issues. A warning here indicates a real rule
+      # problem and should be fixed, not filtered out.
+      - name: Check rules
+        run: sigma check detections/sigma
+
+      # `opensearch` is not a valid pySigma backend; the backend is named
+      # `opensearch_lucene`. Conversion also requires an explicit
+      # --without-pipeline because no processing pipeline is committed for this
+      # custom `promptshield` logsource — without the flag the conversion aborts
+      # rather than degrading.
+      #
+      # Output is newline-delimited Lucene query strings, one per rule, not JSON.
+      - name: Convert to OpenSearch Lucene queries
+        run: >-
+          sigma convert -t opensearch_lucene --without-pipeline
+          detections/sigma -o /tmp/opensearch-queries.txt
+
+      # Guards against a rule that converts to nothing: pySigma reports success
+      # even when a detection produces an empty query.
+      - name: Verify every rule produced a query
+        run: |
+          python - <<'PY'
+          import pathlib
+          rules = sorted(pathlib.Path("detections/sigma").glob("*.yml"))
+          raw = pathlib.Path("/tmp/opensearch-queries.txt").read_text()
+          queries = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+          assert len(queries) == len(rules), (
+              f"{len(rules)} rules produced {len(queries)} queries"
+          )
+          assert all(queries), "a rule converted to an empty query"
+          print(f"OK: {len(queries)} rules converted to non-empty Lucene queries")
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: opensearch-queries
-          path: /tmp/converted.json
+          path: /tmp/opensearch-queries.txt

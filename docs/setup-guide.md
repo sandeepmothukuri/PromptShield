@@ -55,10 +55,19 @@ docker exec -it psl-ollama ollama pull llama3:8b
 ```
 
 This script:
-- Creates the `promptshield-*` indices in OpenSearch.
-- Imports the dashboards bundle.
-- Triggers a Wazuh ruleset reload.
-- Sends a synthetic test prompt to verify the full pipeline.
+
+- Installs the `promptshield` index template on the standalone OpenSearch.
+- Imports the dashboard bundle into OpenSearch Dashboards.
+- Sends a test prompt through the monitor and waits for the shipper to index it.
+
+It deliberately does **not** pre-create indices. The template matches
+`promptshield-*` and the `log-shipper` service creates the daily index on first
+write; creating one by hand would race the shipper and leave a stray empty
+index.
+
+It also does not reload the Wazuh ruleset. Rules are loaded from the mounted
+`local_rules.xml` at manager start, so a rule change needs
+`docker compose restart wazuh.manager` rather than anything this script does.
 
 ## 6. Verify
 
@@ -66,7 +75,7 @@ This script:
 # Wazuh indexer API (host port 9201)
 curl -sk -u admin:SecretPassword https://localhost:9201/
 
-# Should print "ok"
+# Should print {"status":"ok","service":"promptshield-llm-monitor","version":"0.2.0"}
 curl -s http://localhost:8080/healthz
 
 # Should return a JSON line with classifier_score
@@ -84,7 +93,16 @@ tail -f $(docker volume inspect promptshield-lab_monitor_logs -f '{{.Mountpoint}
 python simulations/prompt_injection/direct_injection.py
 ```
 
-Open the **Wazuh Dashboard** (`https://localhost:5601`) → *Security events* → filter `rule.groups: promptshield`. You should see a fresh alert.
+Open the **Wazuh Dashboard** (`https://localhost:5601`, self-signed certificate) →
+*Security events* → filter `rule.groups: promptshield`. You should see a fresh
+alert.
+
+For the prompt-level telemetry, open **OpenSearch Dashboards**
+(`http://localhost:5602`) → *PromptShield - Overview*. Note these are two
+separate clusters: Wazuh alerts live in the Wazuh indexer (9201) and are served
+by the Wazuh Dashboard, while `promptshield-*` lives in the standalone
+OpenSearch (9200) and is served by OpenSearch Dashboards. Neither UI shows the
+other's data.
 
 ## Troubleshooting
 
@@ -94,6 +112,8 @@ Open the **Wazuh Dashboard** (`https://localhost:5601`) → *Security events* �
 | Ollama OOM | Use `phi3:mini` instead of `llama3:8b`. |
 | No alerts in Wazuh | `docker logs psl-wazuh-manager` — check decoder/rule syntax. |
 | Suricata host capture failing | Ensure `network_mode: host` works on your OS (Linux only). |
+| Dashboards panels empty | `docker compose logs log-shipper` — the shipper is what populates `promptshield-*`. |
+| `promptshield-*` has no documents | Confirm the audit log is being written: `docker compose exec llm-monitor tail /var/log/promptshield/monitor.json`. |
 
 ## Teardown
 

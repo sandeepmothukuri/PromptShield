@@ -22,12 +22,13 @@ volumes:
   suricata_logs:
   zeek_logs:
   monitor_logs:
+  shipper_state:
 
 services:
 
   # ---------- LLM runtime ----------
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.34.0
     container_name: psl-ollama
     restart: unless-stopped
     ports: ["11434:11434"]
@@ -35,12 +36,23 @@ services:
     networks: [promptshield]
 
   openwebui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:v0.3.21
     container_name: psl-openwebui
     restart: unless-stopped
-    depends_on: [ollama]
+    # Depends on the monitor, not on Ollama: every chat request must traverse
+    # the guardrail. Reaching Ollama directly bypasses classification, blocking
+    # and telemetry entirely, which defeats the purpose of the lab.
+    depends_on:
+      llm-monitor:
+        condition: service_healthy
     environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
+      # OpenWebUI talks to the monitor over the OpenAI-compatible protocol.
+      # The /v1 suffix is required and the key must be non-empty even though the
+      # monitor does not validate it. ENABLE_OLLAMA_API is off so the UI cannot
+      # silently fall back to a direct, unmonitored connection.
+      - OPENAI_API_BASE_URL=http://llm-monitor:8080/v1
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-promptshield-lab}
+      - ENABLE_OLLAMA_API=false
       - WEBUI_AUTH=true
     ports: ["3000:8080"]
     volumes: ["openwebui_data:/app/backend/data"]
@@ -52,11 +64,30 @@ services:
     container_name: psl-llm-monitor
     restart: unless-stopped
     depends_on: [ollama]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8080/healthz',timeout=3).status==200 else 1)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     environment:
-      - OLLAMA_URL=http://ollama:11434
-      - LOG_PATH=/var/log/promptshield/monitor.json
+      - OLLAMA_URL=${OLLAMA_URL:-http://ollama:11434}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-llama3:8b}
+      - LOG_PATH=${LOG_PATH:-/var/log/promptshield/monitor.json}
       - CLASSIFIER_THRESHOLD=${CLASSIFIER_THRESHOLD:-0.65}
-    ports: ["8080:8080"]
+      # Every variable documented in .env.example must be forwarded here,
+      # otherwise it is dead config: setting it in .env would silently do
+      # nothing. tests/test_env_consistency.py enforces this.
+      # Default mirrors .env.example. 0.30 is derived from the classifier's
+      # actual score set; 0.65 would leave the hunt-2 band empty.
+      - FLAG_THRESHOLD=${FLAG_THRESHOLD:-0.30}
+      - MAX_PROMPT_CHARS=${MAX_PROMPT_CHARS:-32000}
+      - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS:-20}
+      - RATE_LIMIT_WINDOW_SECONDS=${RATE_LIMIT_WINDOW_SECONDS:-60}
+      - MAX_LOGGED_COMPLETION_CHARS=${MAX_LOGGED_COMPLETION_CHARS:-4000}
+      - REDACT_LOGGED_SECRETS=${REDACT_LOGGED_SECRETS:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    ports: ["${LLM_MONITOR_PORT:-8080}:8080"]
     volumes:
       - monitor_logs:/var/log/promptshield
     networks: [promptshield]
@@ -71,14 +102,14 @@ services:
       - wazuh.indexer
     environment:
       - INDEXER_URL=https://wazuh.indexer:9200
-      - INDEXER_USERNAME=admin
-      - INDEXER_PASSWORD=SecretPassword
+      - INDEXER_USERNAME=${WAZUH_INDEXER_USER:-admin}
+      - INDEXER_PASSWORD=${WAZUH_INDEXER_PASSWORD:-SecretPassword}
       - FILEBEAT_SSL_VERIFICATION_MODE=full
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
       - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
       - SSL_KEY=/etc/ssl/filebeat.key
-      - API_USERNAME=wazuh-wui
-      - API_PASSWORD=MyS3cr37P450r.*-
+      - API_USERNAME=${WAZUH_API_USER:-wazuh-wui}
+      - API_PASSWORD=${WAZUH_API_PASSWORD:-MyS3cr37P450r.*-}
     ports:
       - "1514:1514/udp"
       - "1515:1515"
@@ -89,7 +120,12 @@ services:
       - wazuh_logs:/var/ossec/logs
       - wazuh_data:/var/ossec/queue
       - monitor_logs:/var/log/promptshield:ro
-      - ./config/wazuh_indexer_ssl_certs/root-ca-manager.pem:/etc/ssl/root-ca.pem:ro
+      # The generator emits a single root-ca.pem shared by all three nodes
+      # (see config/certs.yml). An earlier revision mounted root-ca-manager.pem
+      # here, which nothing creates: Docker auto-creates a missing bind-mount
+      # source as a directory, so the manager received a directory where it
+      # expected a PEM and failed TLS startup.
+      - ./config/wazuh_indexer_ssl_certs/root-ca.pem:/etc/ssl/root-ca.pem:ro
       - ./config/wazuh_indexer_ssl_certs/wazuh.manager.pem:/etc/ssl/filebeat.pem:ro
       - ./config/wazuh_indexer_ssl_certs/wazuh.manager-key.pem:/etc/ssl/filebeat.key:ro
       - ./config/wazuh_cluster/wazuh_manager.conf:/wazuh-config-mount/etc/ossec.conf:ro
@@ -113,7 +149,7 @@ services:
         hard: 65536
     ports:
       # Host port 9201; 9200 belongs to the standalone OpenSearch service below
-      - "9201:9200"
+      - "${WAZUH_INDEXER_PORT:-9201}:9200"
     volumes:
       - wazuh_indexer_data:/var/lib/wazuh-indexer
       - ./config/wazuh_indexer_ssl_certs/root-ca.pem:/usr/share/wazuh-indexer/certs/root-ca.pem:ro
@@ -133,13 +169,13 @@ services:
     depends_on:
       - wazuh.indexer
     environment:
-      - INDEXER_USERNAME=admin
-      - INDEXER_PASSWORD=SecretPassword
+      - INDEXER_USERNAME=${WAZUH_INDEXER_USER:-admin}
+      - INDEXER_PASSWORD=${WAZUH_INDEXER_PASSWORD:-SecretPassword}
       - WAZUH_API_URL=https://wazuh.manager
-      - DASHBOARD_USERNAME=kibanaserver
-      - DASHBOARD_PASSWORD=kibanaserver
+      - DASHBOARD_USERNAME=${WAZUH_DASHBOARD_USER:-kibanaserver}
+      - DASHBOARD_PASSWORD=${WAZUH_DASHBOARD_PASSWORD:-kibanaserver}
     ports:
-      - "5601:5601"
+      - "${WAZUH_DASHBOARD_PORT:-5601}:5601"
     volumes:
       - ./config/wazuh_indexer_ssl_certs/wazuh.dashboard.pem:/usr/share/wazuh-dashboard/certs/wazuh-dashboard.pem:ro
       - ./config/wazuh_indexer_ssl_certs/wazuh.dashboard-key.pem:/usr/share/wazuh-dashboard/certs/wazuh-dashboard-key.pem:ro
@@ -150,7 +186,7 @@ services:
 
   # ---------- Network detection ----------
   suricata:
-    image: jasonish/suricata:latest
+    image: jasonish/suricata:7.0.17
     container_name: psl-suricata
     restart: unless-stopped
     network_mode: host
@@ -161,7 +197,7 @@ services:
     command: -i eth0 -S /etc/suricata/rules/promptshield.rules
 
   zeek:
-    image: blacktop/zeek:latest
+    image: blacktop/zeek:4.1.1
     container_name: psl-zeek
     restart: unless-stopped
     network_mode: host
@@ -171,11 +207,51 @@ services:
       - ./detections/zeek/llm_telemetry.zeek:/usr/local/zeek/share/zeek/site/llm_telemetry.zeek:ro
     command: zeek -i eth0 /usr/local/zeek/share/zeek/site/llm_telemetry.zeek
 
+  # ---------- Telemetry shipping ----------
+  # The proxy writes a local JSONL audit log. Without this service nothing
+  # populates promptshield-* and every dashboard panel bound to it is empty.
+  # See docs/telemetry-schema.md and tests/test_ship_logs.py.
+  log-shipper:
+    build: ./llm-monitor
+    container_name: psl-log-shipper
+    restart: unless-stopped
+    depends_on:
+      llm-monitor:
+        condition: service_started
+      opensearch:
+        condition: service_started
+    environment:
+      - AUDIT_LOG=/var/log/promptshield/monitor.json
+      - OPENSEARCH_URL=http://opensearch:9200
+      - INDEX_PREFIX=promptshield
+    volumes:
+      # Read-only: the shipper must not be able to alter the audit log.
+      - monitor_logs:/var/log/promptshield:ro
+      # Writable, for the byte-offset registry. Keeping this in a separate
+      # volume is what lets the log mount stay read-only; without it the
+      # default registry path would land inside the :ro mount.
+      - shipper_state:/var/lib/promptshield-shipper
+      - ./scripts/ship_logs.py:/app/scripts/ship_logs.py:ro
+      - ./config/opensearch:/app/config/opensearch:ro
+    command: >
+      python /app/scripts/ship_logs.py
+      --log /var/log/promptshield/monitor.json
+      --registry /var/lib/promptshield-shipper/monitor.json.offset
+      --opensearch http://opensearch:9200
+      --follow --interval 5 --ensure-template
+    networks: [promptshield]
+
   # ---------- Search / dashboards ----------
   opensearch:
     image: opensearchproject/opensearch:2.13.0
     container_name: psl-opensearch
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
     environment:
       - discovery.type=single-node
       - DISABLE_SECURITY_PLUGIN=true
@@ -183,7 +259,7 @@ services:
       - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
     ulimits:
       memlock: { soft: -1, hard: -1 }
-    ports: ["9200:9200"]
+    ports: ["${OPENSEARCH_PORT:-9200}:9200"]
     volumes: ["opensearch_data:/usr/share/opensearch/data"]
     networks: [promptshield]
 
@@ -195,5 +271,5 @@ services:
     environment:
       - OPENSEARCH_HOSTS=http://opensearch:9200
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
-    ports: ["5602:5601"]
+    ports: ["${OPENSEARCH_DASHBOARDS_PORT:-5602}:5601"]
     networks: [promptshield]

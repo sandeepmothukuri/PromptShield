@@ -1,0 +1,13 @@
+%% Analyst workflow. Source of truth for docs/img/soc-investigation.svg.
+flowchart LR
+    T1["1 Alert triage<br/>rule.groups: promptshield<br/>rule.level >= 10"]
+    T2["2 Recover the event<br/>term: request_id<br/>read prompt, classifier_score"]
+    T3["3 Establish scope<br/>session_id / user<br/>source_ip / prompt_hash"]
+    T4["4 Assess impact<br/>secrets_in_completion<br/>verdict: allow"]
+
+    T1 --> T2 --> T3 --> T4
+
+    T4 --> C1["Add classifier indicator"]
+    T4 --> C2["Add or tune Sigma rule"]
+    T4 --> C3["Promote the hunt"]
+    T4 --> C4["Update the playbook"]

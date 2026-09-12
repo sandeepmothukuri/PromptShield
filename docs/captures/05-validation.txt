@@ -1,0 +1,29 @@
+$ sigma check detections/sigma
+Parsing Sigma rules
+Checking Sigma rules
+
+=== Summary ===
+Found 0 errors, 0 condition errors and 0 issues.
+No rule errors found.
+No condition errors found.
+No validation issues found.
+
+$ sigma convert -t opensearch detections/sigma/prompt_injection_direct.yml
+Usage: sigma convert [OPTIONS] INPUT...
+Try 'sigma convert --help' for help.
+
+Error: Invalid value for '--target' / '-t': 'opensearch' is not one of 'lucene', 'eql', 'esql', 'elastalert', 'opensearch_lucene', 'open_search_ppl'. - run sigma plugin list --plugin-type backend for a list of available plugins.
+
+$ python -m pytest tests/ llm-monitor/tests/ -q
+........................................................................ [ 40%]
+........................................................................ [ 81%]
+................................                                         [100%]
+176 passed in 3.97s
+
+$ python -m ruff check .
+185 +     return bool(eval(expr, {"__builtins__": {}}, {"True": True, "False": False}))
+186 |
+    |
+
+Found 14 errors.
+[*] 8 fixable with the `--fix` option (1 hidden fix can be enabled with the `--unsafe-fixes` option).

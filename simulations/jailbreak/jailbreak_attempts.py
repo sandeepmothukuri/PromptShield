@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 """LLM jailbreak simulation — DAN, hypothetical framing, encoded payloads."""
+
 from __future__ import annotations
 
 import argparse

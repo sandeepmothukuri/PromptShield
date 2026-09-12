@@ -1,38 +1,63 @@
-title: Sensitive Data Exfiltration via LLM Response
+title: Secret Or PII Disclosure In LLM Completion
 id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a003
 status: experimental
 description: |
-  Detects LLM responses that contain PII, secrets, or internal identifiers,
-  suggesting either a successful prompt-injection exfil or accidental leakage
-  of context data into the completion. Reads from the `completion` field of
-  the LLM-Monitor audit log.
-author: PromptShield-Lab
-date: 2026/01/15
+  Detects model completions that contain credential material or regulated PII. The
+  secrets reach the completion either because they were present in the supplied
+  context (RAG document, pasted memo, system prompt) or because the model reproduced
+  training data. Once present in a completion the material is outside its trust
+  boundary.
+rationale: |
+  T1552 is mapped because the detection identifies credential material residing in a
+  channel that is not an approved secret store. T1041 and T1567 are deliberately not
+  tagged: they apply only once the completion is transmitted out of the environment,
+  which this rule does not observe. MITRE ATLAS AML.T0057 (LLM Data Leakage) is the
+  native mapping.
+author: Sandeep Mothukuri
+date: 2026-01-15
+modified: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1552/
+  - https://atlas.mitre.org/techniques/AML.T0057
 logsource:
   product: promptshield
   service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
 detection:
-  secrets:
+  selection_cloud_credential:
     completion|re:
-      - 'AKIA[0-9A-Z]{16}'                          # AWS access key
-      - '(?i)aws_secret_access_key\\s*[:=]\\s*[A-Za-z0-9/+=]{40}'
-      - 'sk-[A-Za-z0-9]{32,}'                       # OpenAI-style key
-      - 'ghp_[A-Za-z0-9]{36}'                       # GitHub PAT
-      - 'xox[baprs]-[A-Za-z0-9-]{10,}'              # Slack token
-  pii:
+      - 'AKIA[0-9A-Z]{16}'
+      - '(?i)aws_secret_access_key\s*[:=]\s*[A-Za-z0-9/+=]{40}'
+      - 'AIza[0-9A-Za-z\-_]{35}'
+  selection_token:
     completion|re:
-      - '\\b\\d{3}-\\d{2}-\\d{4}\\b'                # US SSN
-      - '\\b4[0-9]{12}(?:[0-9]{3})?\\b'             # Visa
-  condition: 1 of them
+      - 'sk-[A-Za-z0-9]{32,}'
+      - 'ghp_[A-Za-z0-9]{36}'
+      - 'github_pat_[A-Za-z0-9_]{20,}'
+      - 'xox[baprs]-[A-Za-z0-9-]{10,}'
+      - '-----BEGIN [A-Z ]*PRIVATE KEY-----'
+  selection_pii:
+    completion|re:
+      - '\b\d{3}-\d{2}-\d{4}\b'
+      - '\b4[0-9]{12}(?:[0-9]{3})?\b'
+  condition: 1 of selection_*
 fields:
-  - user
+  - '@timestamp'
+  - request_id
   - session_id
+  - user
+  - model
   - completion
 falsepositives:
-  - Intentional security demo content
-  - Documentation snippets discussing key formats
+  - Documentation or test fixtures that quote credential formats
+  - Synthetic keys used deliberately in this lab (AKIAIOSFODNN7EXAMPLE is the AWS documentation example key)
 level: critical
 tags:
-  - attack.exfiltration
-  - attack.t1041
-  - owasp.llm06
+  - attack.t1552
+  - attack.credential-access
+metadata:
+  owasp_llm_2025: LLM02
+  owasp_llm_2023: LLM06
+  atlas: AML.T0057
+  lab_scenario: simulations/data_exfiltration/exfil_simulation.py
+  wazuh_rule_id: 100130

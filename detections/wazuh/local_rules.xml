@@ -1,74 +1,127 @@
 <!--
-  PromptShield-Lab — Wazuh local rules.
-  Group: promptshield. All rules carry MITRE technique IDs for the
-  ATT&CK Coverage dashboard.
+  PromptShield-Lab - Wazuh local rules for LLM telemetry.
+
+  Mounted at: /wazuh-config-mount/etc/rules/local_rules.xml
+  Group     : promptshield,llm
+  Decoder   : promptshield-json (detections/wazuh/decoders.xml)
+
+  Every rule carries the same MITRE ATT&CK technique ID that the corresponding
+  Sigma rule in detections/sigma/ tags and that the LLM-Monitor writes to the
+  `technique` field of the event. Technique IDs are validated against the live
+  MITRE ATT&CK feed by tests/test_attack_mappings.py.
+
+  Severity ladder
+    3  informational - request observed
+    8  medium        - abuse/tooling request
+    9  high          - resource exhaustion
+   10  high          - injection / jailbreak / phishing blocked
+   12  high          - jailbreak confirmed by classifier
+   13  critical       - secret or PII disclosure
 -->
 
 <group name="promptshield,llm,">
 
   <rule id="100100" level="3">
-    <decoded_as>json</decoded_as>
-    <description>PromptShield: LLM request observed</description>
+    <decoded_as>promptshield-json</decoded_as>
+    <field name="request_id">\.+</field>
+    <description>PromptShield: LLM request observed (attack_type=$(attack_type), verdict=$(verdict))</description>
+    <group>llm_telemetry,</group>
   </rule>
 
   <rule id="100110" level="10">
     <if_sid>100100</if_sid>
+    <field name="attack_type">prompt_injection|indirect_prompt_injection</field>
     <field name="verdict">block</field>
-    <description>PromptShield: prompt blocked by guardrail ($(reason))</description>
+    <description>PromptShield: prompt injection blocked (user=$(user) request=$(request_id) reason=$(detection_reason))</description>
     <mitre>
       <id>T1059</id>
+      <id>T1566.002</id>
     </mitre>
-    <group>owasp_llm01,</group>
+    <group>attack,owasp_llm01,</group>
   </rule>
 
   <rule id="100120" level="12">
     <if_sid>100100</if_sid>
-    <field name="category">jailbreak</field>
-    <description>PromptShield: LLM jailbreak attempt detected (user=$(user))</description>
+    <field name="attack_type">jailbreak</field>
+    <description>PromptShield: LLM jailbreak attempt (user=$(user) score=$(classifier_score) obfuscated=$(obfuscated))</description>
     <mitre>
+      <id>T1059</id>
       <id>T1027</id>
     </mitre>
-    <group>owasp_llm01,</group>
+    <group>attack,owasp_llm01,</group>
   </rule>
 
   <rule id="100130" level="13">
     <if_sid>100100</if_sid>
-    <field name="category">data_exfiltration</field>
-    <description>PromptShield: sensitive data in LLM response (user=$(user))</description>
+    <field name="secrets_in_completion">\S</field>
+    <description>PromptShield: credential or PII disclosed in LLM completion (user=$(user) request=$(request_id))</description>
     <mitre>
-      <id>T1041</id>
+      <id>T1552</id>
     </mitre>
-    <group>owasp_llm06,</group>
+    <group>attack,owasp_llm02,</group>
   </rule>
 
   <rule id="100140" level="10">
     <if_sid>100100</if_sid>
-    <field name="category">ai_phishing</field>
-    <description>PromptShield: AI-assisted phishing content generation</description>
+    <field name="attack_type">ai_phishing</field>
+    <description>PromptShield: AI-assisted phishing content generation (user=$(user) request=$(request_id))</description>
     <mitre>
-      <id>T1566.001</id>
+      <id>T1566</id>
     </mitre>
-    <group>owasp_llm09,</group>
+    <group>attack,owasp_llm09,</group>
   </rule>
 
-  <rule id="100150" level="10">
+  <rule id="100150" level="12">
     <if_sid>100100</if_sid>
-    <field name="category">system_prompt_leak</field>
-    <description>PromptShield: system prompt leakage attempt</description>
+    <field name="attack_type">system_prompt_leak</field>
+    <description>PromptShield: system prompt extraction attempt (user=$(user) request=$(request_id))</description>
     <mitre>
       <id>T1552</id>
     </mitre>
-    <group>owasp_llm06,</group>
+    <group>attack,owasp_llm07,</group>
   </rule>
 
   <rule id="100160" level="9">
     <if_sid>100100</if_sid>
-    <field name="category">token_flood</field>
-    <description>PromptShield: token-flood DoS pattern</description>
+    <field name="attack_type">token_flood</field>
+    <description>PromptShield: LLM resource exhaustion (user=$(user) status=$(response_status) reason=$(detection_reason))</description>
     <mitre>
-      <id>T1499.001</id>
+      <id>T1499.004</id>
     </mitre>
-    <group>owasp_llm04,</group>
+    <group>attack,owasp_llm10,</group>
+  </rule>
+
+  <rule id="100170" level="8">
+    <if_sid>100100</if_sid>
+    <field name="attack_type">malicious_tooling</field>
+    <description>PromptShield: request for offensive tooling or attack code (user=$(user))</description>
+    <mitre>
+      <id>T1588.001</id>
+      <id>T1059</id>
+    </mitre>
+    <group>attack,</group>
+  </rule>
+
+  <rule id="100180" level="10">
+    <if_sid>100100</if_sid>
+    <field name="attack_type">insecure_output</field>
+    <description>PromptShield: unsafe markup or injection payload in LLM completion (user=$(user))</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+    <group>attack,owasp_llm05,</group>
+  </rule>
+
+  <!-- Correlation: one user tripping several distinct attack types quickly is a
+       stronger signal than any single event. timeframe/frequency are per rule id. -->
+  <rule id="100190" level="12" frequency="5" timeframe="300">
+    <if_matched_sid>100100</if_matched_sid>
+    <same_source_ip />
+    <description>PromptShield: repeated abusive LLM requests from user $(user) within 5 minutes</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>attack,owasp_llm06,</group>
   </rule>
 
 </group>

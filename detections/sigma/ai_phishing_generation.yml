@@ -1,39 +1,69 @@
-title: AI-Assisted Phishing Content Generation
+title: AI-Assisted Phishing And Social Engineering Content Generation
 id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a004
 status: experimental
 description: |
-  Detects users coercing the LLM into producing phishing-grade content:
-  urgent finance-themed emails, credential-harvest landing pages, brand
-  impersonation copy, or smishing SMS templates.
-author: PromptShield-Lab
-date: 2026/01/15
+  Detects requests that coerce the model into producing delivery-ready social
+  engineering content: brand-impersonating email copy, credential-harvesting landing
+  page text, urgency-driven payment requests, or smishing SMS templates. The model is
+  being used as a content-production tool for a campaign that will target third
+  parties.
+rationale: |
+  T1566 (parent Phishing) is mapped because the detection fires on generation of
+  phishing content, before any delivery vector is chosen. The sub-techniques
+  T1566.001 (Attachment) and T1566.002 (Link) describe the delivery mechanism and
+  cannot be determined from the generation event alone.
+author: Sandeep Mothukuri
+date: 2026-01-15
+modified: 2026-09-12
+references:
+  - https://attack.mitre.org/techniques/T1566/
+  - https://atlas.mitre.org/techniques/AML.T0048
 logsource:
   product: promptshield
   service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
 detection:
-  intent:
+  selection_intent:
     prompt|contains:
       - 'write a phishing email'
       - 'write an email pretending to be'
+      - 'draft a convincing phishing'
       - 'create a login page that looks like'
+      - 'clone the microsoft 365 sign-in'
       - 'craft a smishing message'
-      - 'urgent action required from'
-  pretext:
+      - 'write a fake invoice email'
+  selection_pretext:
     prompt|contains:
-      - 'impersonate the CEO'
-      - 'spoof microsoft 365 password reset'
-      - 'fake invoice from'
+      - 'impersonate the ceo'
+      - 'pretending to be fedex'
+      - 'urgent action required from'
       - 'we noticed unusual sign-in'
-  condition: 1 of intent or 1 of pretext
+      - 'verify your password immediately'
+      - 'spoof microsoft 365 password reset'
+  condition: 1 of selection_*
 fields:
-  - user
+  - '@timestamp'
+  - request_id
   - session_id
+  - user
+  - source_ip
   - prompt
+  - completion
 falsepositives:
-  - Awareness-training content authors
-  - Authorized red-team phishing simulations
+  - Security awareness and phishing-simulation teams authoring training content
+  - Authorized red-team engagements with a documented scope
 level: high
 tags:
-  - attack.initial_access
-  - attack.t1566.001
-  - owasp.llm09
+  - attack.t1566
+  - attack.initial-access
+metadata:
+  owasp_llm_2025: LLM09
+  owasp_llm_2023: LLM09
+  atlas: AML.T0048
+  lab_scenario: simulations/ai_phishing/phishing_generation.py
+  wazuh_rule_id: 100140
+  mapping_note: >-
+    OWASP LLM09 (2025) Misinformation is the closest Top 10 entry - the model is
+    producing content designed to deceive a third party. Where the request only
+    succeeded because a jailbreak defeated the content filter, LLM01 is the
+    contributing control failure and the jailbreak rule should co-fire.

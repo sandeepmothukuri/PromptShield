@@ -1,0 +1,14 @@
+%% End-to-end workflow. Source of truth for docs/img/attack-to-detection.svg.
+flowchart LR
+    S1["1 Adversary simulation<br/>simulations/*.py"]
+    S2["2 Classification<br/>attack_type / technique<br/>verdict allow|block"]
+    S3["3 Telemetry<br/>monitor.json<br/>request_id / prompt_hash"]
+    S4["4 Detection rules<br/>Wazuh 100100-100190<br/>Sigma 10 rules"]
+    S5["5 Alert<br/>wazuh-alerts-*<br/>rule.mitre.id"]
+    S6["6 Search and dashboards<br/>promptshield-* / 12 panels"]
+    S7["7 Investigation<br/>pivot on request_id"]
+    S8["8 Threat hunt<br/>hunting/ 11 queries"]
+    S9["9 Incident response<br/>playbooks/ 5 playbooks"]
+
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
+    S9 -.->|findings become indicators, rules, fixtures| S3

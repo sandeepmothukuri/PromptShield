@@ -1,0 +1,67 @@
+title: LLM Direct Prompt Injection - Instruction Override
+id: 7c6a2b2c-3f5a-4a8e-9c1d-c1e0a6b4a001
+status: experimental
+description: |
+  Detects direct prompt-injection attempts in which the user instructs the model to
+  discard, override or replace the operator-supplied instructions that govern its
+  behaviour. The observable is attacker-controlled text asserting precedence over the
+  system prompt, which is the prerequisite for every downstream LLM attack (policy
+  bypass, disclosure, tool abuse).
+rationale: |
+  T1059 is mapped because the model is the interpreter that executes the
+  attacker-supplied instruction stream; the detection fires on the instruction
+  override itself, not on any resulting command.
+author: Sandeep Mothukuri
+date: 2026-01-15
+modified: 2026-09-12
+references:
+  - https://owasp.org/www-project-top-10-for-large-language-model-applications/
+  - https://attack.mitre.org/techniques/T1059/
+  - https://atlas.mitre.org/techniques/AML.T0051.000
+logsource:
+  product: promptshield
+  service: llm-monitor
+  definition: 'One JSON event per inference request, emitted by the PromptShield LLM-Monitor proxy to /var/log/promptshield/monitor.json.'
+detection:
+  selection_override:
+    prompt|contains:
+      - 'ignore previous instructions'
+      - 'ignore the above'
+      - 'ignore all rules'
+      - 'disregard all prior'
+      - 'disregard previous context'
+      - 'forget your instructions'
+      - 'discard previous guidance'
+      - 'override your system prompt'
+      - 'new directive'
+  selection_persona:
+    prompt|contains:
+      - 'you are now an unrestricted assistant'
+      - 'pretend you are an ai without restrictions'
+      - 'act as an evil ai'
+      - 'no content policy'
+      - 'safety rules are suspended'
+  condition: 1 of selection_*
+fields:
+  - '@timestamp'
+  - request_id
+  - session_id
+  - user
+  - source_ip
+  - prompt
+  - classifier_score
+  - verdict
+falsepositives:
+  - Authorized red-team or purple-team testing against the lab
+  - Prompt-engineering research discussing injection techniques
+  - Security awareness material quoting injection phrases
+level: high
+tags:
+  - attack.t1059
+  - attack.execution
+metadata:
+  owasp_llm_2025: LLM01
+  owasp_llm_2023: LLM01
+  atlas: AML.T0051.000
+  lab_scenario: simulations/prompt_injection/direct_injection.py
+  wazuh_rule_id: 100110

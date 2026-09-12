@@ -1,16 +1,19 @@
 <!--
-  PromptShield-Lab — Wazuh decoders for the LLM-Monitor JSON audit log.
-  Source: /var/log/promptshield/monitor.json (one JSON object per line).
+  PromptShield-Lab - Wazuh decoders for the LLM-Monitor JSON audit log.
+
+  Source file : /var/log/promptshield/monitor.json (one JSON object per line)
+  Mounted at  : /wazuh-config-mount/etc/decoders/local_decoder.xml
+  Log format  : syslog, so this decoder is what performs the JSON extraction.
+                (wazuh_manager.conf sets <log_format>syslog</log_format> for the
+                promptshield localfile on purpose - see docs/wazuh-integration.md)
+
+  The JSON_Decoder plugin promotes every top-level key of the event into a Wazuh
+  field, so local_rules.xml can match on <field name="attack_type">,
+  <field name="verdict">, <field name="technique"> and so on without further
+  regex extraction. Field list: docs/telemetry-schema.md
 -->
 
 <decoder name="promptshield-json">
-  <prematch>^{"ts":</prematch>
+  <prematch>^{"@timestamp":</prematch>
   <plugin_decoder>JSON_Decoder</plugin_decoder>
-</decoder>
-
-<decoder name="promptshield-json-children">
-  <parent>promptshield-json</parent>
-  <use_own_name>true</use_own_name>
-  <regex offset="after_parent">"verdict":"(\S+?)"</regex>
-  <order>verdict</order>
 </decoder>

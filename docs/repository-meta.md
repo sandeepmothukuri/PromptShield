@@ -2,7 +2,7 @@
 
 ## "About" — short repository description (350-char limit)
 
-> Open-source AI security & SOC detection lab. Simulate prompt injection, LLM jailbreaks, AI phishing, and data exfiltration — then detect, hunt, and respond using Wazuh, Suricata, Zeek, OpenSearch, and Sigma. 25+ detections mapped to MITRE ATT&CK and OWASP LLM Top 10. One `docker compose up` away.
+> Open-source AI security & SOC detection lab. Simulate prompt injection, LLM jailbreaks, AI phishing, and data exfiltration — then detect, hunt, and respond using Wazuh, Suricata, Zeek, OpenSearch, and Sigma. 10 Sigma rules, 10 Wazuh rules, 7 Suricata signatures and a Zeek script, mapped to MITRE ATT&CK and OWASP LLM Top 10. One `docker compose up` away.
 
 ## Website field
 https://github.com/sandeepmothukuri/PromptShield
@@ -34,7 +34,6 @@ cybersecurity
 cybersecurity-lab
 docker-compose
 ollama
-langchain
 openwebui
 atomic-red-team
 ai-red-team
@@ -46,7 +45,7 @@ detection-as-code
 
 ## SEO meta description (for any rendered docs site)
 
-> PromptShield-Lab is a free, open-source AI security and SOC detection-engineering lab. Spin up a full LLM + SIEM stack locally with Docker and learn to defend against prompt injection, jailbreaks, AI phishing, and data exfiltration. Includes Sigma, Wazuh, Suricata, and Zeek detections mapped to MITRE ATT&CK and OWASP LLM Top 10.
+> PromptShield-Lab is a free, open-source AI security and SOC detection-engineering lab. Spin up a full LLM + SIEM stack locally with Docker and learn to defend against prompt injection, jailbreaks, AI phishing, and data exfiltration. Includes 10 Sigma rules, 10 Wazuh rules, 7 Suricata signatures and a Zeek script, all mapped to MITRE ATT&CK and OWASP LLM Top 10.
 
 ## Suggested social card (1280×640 PNG)
 

@@ -1,0 +1,26 @@
+# LLM extension to Atomic Red Team technique T1499.004
+# (Endpoint Denial of Service: Application or System Exploitation).
+#
+# .004 is used rather than .001 (OS Exhaustion Flood) because the target is the
+# inference application and its cost budget, not the operating system.
+attack_technique: T1499.004
+display_name: 'Endpoint Denial of Service: Application or System Exploitation'
+atomic_tests:
+  - name: LLM token flood
+    auto_generated_guid: 6e7f8091-2345-6789-abcd-ef0123456789
+    description: >-
+      Sends oversized prompts and a request burst to trip the size and rate
+      limits. Expected outcome is HTTP 413 and 429 responses, attack_type
+      token_flood, and Wazuh rule 100160 firing at level 9. Prefer the committed
+      simulation for a realistic shape:
+      simulations/llm_dos/token_flood.py
+    supported_platforms:
+      - linux
+      - windows
+      - macos
+    executor:
+      name: sh
+      command: |
+        python simulations/llm_dos/token_flood.py --target http://localhost:8080
+      cleanup_command: ''
+      elevation_required: false
