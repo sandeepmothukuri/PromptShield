@@ -32,6 +32,7 @@ telemetry — and then detects, alerts on, hunts and responds to it.
 - [Quickstart](#quickstart)
 - [CLI](#cli)
 - [Lab scenarios](#lab-scenarios)
+- [Attack-to-detection workflow](#attack-to-detection-workflow)
 - [Detection engineering](#detection-engineering)
 - [MITRE ATT&CK mapping](#mitre-attack-mapping)
 - [SOC investigation](#soc-investigation)
@@ -130,6 +131,16 @@ A blocked or failed request returns a non-zero exit code; successful requests re
 
 The scenarios move from adversarial input through the monitored request path and into detection and response workflows.
 
+## Attack-to-detection workflow
+
+<p align="center">
+  <img src="docs/img/attack-to-detection.svg" alt="PromptShield end-to-end attack, classification, telemetry, detection, investigation, hunting and incident response workflow" width="100%">
+</p>
+
+<p align="center"><sub>Figure 5 — End-to-end attack → detection → investigation → response workflow</sub></p>
+
+The workflow diagram provides the end-to-end operational view of PromptShield. It connects adversary simulation, classification, telemetry, Wazuh/Sigma detection, alerting, OpenSearch investigation, threat hunting and incident response without duplicating the individual component visuals used elsewhere in the README.
+
 ## Detection engineering
 
 Ten Sigma rules, ten Wazuh rules, seven Suricata signatures and one Zeek script are maintained as version-controlled detection content.
@@ -138,7 +149,7 @@ Ten Sigma rules, ten Wazuh rules, seven Suricata signatures and one Zeek script 
   <img src="docs/img/sigma-ci.svg" alt="PromptShield Sigma detection rules validated in CI" width="100%">
 </p>
 
-<p align="center"><sub>Figure 5 — Detection-as-code validation in CI</sub></p>
+<p align="center"><sub>Figure 6 — Detection-as-code validation in CI</sub></p>
 
 ## MITRE ATT&CK mapping
 
@@ -152,7 +163,7 @@ Correlation identifiers connect alerts back to originating requests so analysts 
   <img src="docs/img/soc-investigation.svg" alt="PromptShield SOC investigation workflow pivoting from alert to telemetry and hunting" width="100%">
 </p>
 
-<p align="center"><sub>Figure 6 — SOC investigation and correlation workflow</sub></p>
+<p align="center"><sub>Figure 7 — SOC investigation and correlation workflow</sub></p>
 
 The primary correlation key is `request_id`, with `session_id`, `user`, `source_ip` and `prompt_hash` supporting additional pivots. The full contract is documented in [`docs/telemetry-schema.md`](docs/telemetry-schema.md).
 
@@ -164,7 +175,7 @@ The repository includes hypothesis-driven OpenSearch queries covering injection,
   <img src="docs/img/hunting-query.svg" alt="PromptShield threat hunting query and investigation pivots" width="100%">
 </p>
 
-<p align="center"><sub>Figure 7 — Threat hunting query workflow</sub></p>
+<p align="center"><sub>Figure 8 — Threat hunting query workflow</sub></p>
 
 ## Dashboards
 
@@ -174,7 +185,7 @@ OpenSearch Dashboards provides the analyst search and visualization layer for Pr
   <img src="docs/img/dashboard-overview.svg" alt="PromptShield OpenSearch dashboard overview with prompt security metrics" width="100%">
 </p>
 
-<p align="center"><sub>Figure 8 — PromptShield dashboard overview</sub></p>
+<p align="center"><sub>Figure 9 — PromptShield dashboard overview</sub></p>
 
 > **Visual note:** this repository asset is an illustrative dashboard mockup, not a captured production or live-lab screenshot. See `docs/screenshots.md` for instructions to capture real evidence from the running stack.
 
@@ -188,7 +199,7 @@ Response playbooks are designed around explicit safety gates and controlled auto
   <img src="docs/img/incident-response.svg" alt="PromptShield incident response workflow from alert triage through containment and recovery" width="100%">
 </p>
 
-<p align="center"><sub>Figure 9 — Incident response operating model</sub></p>
+<p align="center"><sub>Figure 10 — Incident response operating model</sub></p>
 
 ## Network detection
 
@@ -198,13 +209,13 @@ PromptShield includes network-oriented detection content for the LLM traffic pat
   <img src="docs/img/suricata.svg" alt="PromptShield Suricata network detection flow" width="100%">
 </p>
 
-<p align="center"><sub>Figure 10 — Suricata inspection and signature workflow</sub></p>
+<p align="center"><sub>Figure 11 — Suricata inspection and signature workflow</sub></p>
 
 <p align="center">
   <img src="docs/img/zeek.svg" alt="PromptShield Zeek telemetry and network analysis workflow" width="100%">
 </p>
 
-<p align="center"><sub>Figure 11 — Zeek telemetry and network analysis workflow</sub></p>
+<p align="center"><sub>Figure 12 — Zeek telemetry and network analysis workflow</sub></p>
 
 ## Validation
 
