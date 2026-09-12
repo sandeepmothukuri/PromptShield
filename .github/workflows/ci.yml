@@ -17,14 +17,16 @@ env:
   SIGMA_CLI_VERSION: "3.1.0"
   PYSIGMA_VERSION: "1.5.0"
   PYSIGMA_OPENSEARCH_VERSION: "2.0.3"
+  PYTEST_VERSION: "9.1.1"
+  PYYAML_VERSION: "6.0.3"
 
 jobs:
   lint-python:
     name: Lint (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "ruff==${RUFF_VERSION}"
@@ -37,8 +39,8 @@ jobs:
     name: Sigma rules
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: >-
@@ -53,8 +55,8 @@ jobs:
     name: YAML lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install "yamllint==${YAMLLINT_VERSION}"
@@ -64,8 +66,8 @@ jobs:
     name: Detection and contract tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: |
@@ -73,8 +75,16 @@ jobs:
           # llm-monitor pins its own runtime deps; test_proxy_telemetry.py
           # imports fastapi.testclient, so the app deps are test deps too.
           pip install -r llm-monitor/requirements.txt
-          pip install pytest pyyaml
+          pip install "pytest==${PYTEST_VERSION}" "pyyaml==${PYYAML_VERSION}"
       # Both test directories. Running only llm-monitor/tests would skip the
       # Sigma evaluation, ATT&CK mapping, dashboard field and documentation
       # integrity suites, which is most of the detection coverage.
       - run: pytest tests/ llm-monitor/tests/ -q
+
+  compose-config:
+    name: Docker Compose config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
