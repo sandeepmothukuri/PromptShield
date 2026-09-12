@@ -38,6 +38,7 @@ telemetry — and then detects, alerts on, hunts and responds to it.
 - [Threat hunting](#threat-hunting)
 - [Dashboards](#dashboards)
 - [Incident response](#incident-response)
+- [Network detection](#network-detection)
 - [Validation](#validation)
 - [Known limitations](#known-limitations)
 - [Contributing](#contributing)
@@ -62,17 +63,21 @@ PromptShield-Lab is a self-hosted lab for LLM detection engineering. It covers t
 
 An inspecting proxy sits between the chat front-end and the model runtime so prompt and completion context can be converted into stable telemetry for detection engineering.
 
-## Architecture
-
-The architecture is shown once at the top of this README as the primary visual reference. Its source is [`docs/diagrams/architecture.mmd`](docs/diagrams/architecture.mmd).
-
-### Detection pipeline
-
 <p align="center">
-  <img src="docs/img/detection-pipeline.svg" alt="PromptShield detection pipeline showing telemetry fan-out into Wazuh, Sigma and dashboards" width="100%">
+  <img src="docs/img/openwebui.svg" alt="PromptShield OpenWebUI interaction with a blocked prompt injection request" width="100%">
 </p>
 
-<p align="center"><sub>Figure 2 — Telemetry contract and detection pipeline</sub></p>
+<p align="center"><sub>Figure 2 — OpenWebUI request flow and PromptShield blocking behaviour</sub></p>
+
+## Architecture
+
+The high-level architecture is shown once at the top of this README. The implementation reference below focuses on how telemetry feeds detections and analyst workflows.
+
+<p align="center">
+  <img src="docs/img/detection-pipeline.svg" alt="PromptShield detection pipeline showing telemetry flowing into Wazuh, Sigma and dashboards" width="100%">
+</p>
+
+<p align="center"><sub>Figure 3 — Telemetry contract and detection pipeline</sub></p>
 
 Source: [`docs/diagrams/detection-pipeline.mmd`](docs/diagrams/detection-pipeline.mmd)
 
@@ -89,21 +94,6 @@ docker compose up -d
 ```
 
 The setup script expects the full Docker stack to be running. It installs the OpenSearch template, imports the dashboard bundle, sends a smoke-test request through the monitor and waits for the resulting telemetry to be indexed. See [`scripts/setup.sh`](scripts/setup.sh).
-
-### What the lab looks like
-
-The normal analyst flow is:
-
-```text
-OpenWebUI → LLM-Monitor → Ollama
-              │
-              ├── monitor.json
-              ├── Wazuh / Sigma
-              ├── OpenSearch
-              └── hunting + playbooks
-```
-
-The repository diagrams document the implemented flow without fabricating live screenshots. Run the stack locally to generate environment-specific dashboard and alert screenshots.
 
 ## CLI
 
@@ -133,16 +123,22 @@ A blocked or failed request returns a non-zero exit code; successful requests re
 ## Lab scenarios
 
 <p align="center">
-  <img src="docs/img/attack-to-detection.svg" alt="PromptShield attack to detection to response workflow" width="100%">
+  <img src="docs/img/simulation-output.svg" alt="PromptShield adversary simulation output and scenario execution" width="100%">
 </p>
 
-<p align="center"><sub>Figure 3 — End-to-end attack, detection, investigation and response workflow</sub></p>
+<p align="center"><sub>Figure 4 — Adversary simulation output</sub></p>
 
 The scenarios move from adversarial input through the monitored request path and into detection and response workflows.
 
 ## Detection engineering
 
 Ten Sigma rules, ten Wazuh rules, seven Suricata signatures and one Zeek script are maintained as version-controlled detection content.
+
+<p align="center">
+  <img src="docs/img/sigma-ci.svg" alt="PromptShield Sigma detection rules validated in CI" width="100%">
+</p>
+
+<p align="center"><sub>Figure 5 — Detection-as-code validation in CI</sub></p>
 
 ## MITRE ATT&CK mapping
 
@@ -152,23 +148,63 @@ The project maps supported LLM security behaviours to Enterprise ATT&CK where ap
 
 Correlation identifiers connect alerts back to originating requests so analysts can pivot from the alert to source telemetry.
 
+<p align="center">
+  <img src="docs/img/soc-investigation.svg" alt="PromptShield SOC investigation workflow pivoting from alert to telemetry and hunting" width="100%">
+</p>
+
+<p align="center"><sub>Figure 6 — SOC investigation and correlation workflow</sub></p>
+
 The primary correlation key is `request_id`, with `session_id`, `user`, `source_ip` and `prompt_hash` supporting additional pivots. The full contract is documented in [`docs/telemetry-schema.md`](docs/telemetry-schema.md).
 
 ## Threat hunting
 
 The repository includes hypothesis-driven OpenSearch queries covering injection, jailbreaks, secrets, system-prompt extraction, token abuse, source anomalies and request pivots.
 
+<p align="center">
+  <img src="docs/img/hunting-query.svg" alt="PromptShield threat hunting query and investigation pivots" width="100%">
+</p>
+
+<p align="center"><sub>Figure 7 — Threat hunting query workflow</sub></p>
+
 ## Dashboards
 
 OpenSearch Dashboards provides the analyst search and visualization layer for PromptShield telemetry.
 
-> **Live UI evidence:** dashboard screenshots should be generated from the running lab rather than represented by generic or stock imagery. This keeps the README evidence tied to the actual environment and avoids misleading visitors about what is currently deployed.
+<p align="center">
+  <img src="docs/img/dashboard-overview.svg" alt="PromptShield OpenSearch dashboard overview with prompt security metrics" width="100%">
+</p>
+
+<p align="center"><sub>Figure 8 — PromptShield dashboard overview</sub></p>
+
+> **Visual note:** this repository asset is an illustrative dashboard mockup, not a captured production or live-lab screenshot. See `docs/screenshots.md` for instructions to capture real evidence from the running stack.
 
 The imported dashboard bundle is stored under `dashboards/` and loaded by [`scripts/setup.sh`](scripts/setup.sh).
 
 ## Incident response
 
 Response playbooks are designed around explicit safety gates and controlled automation.
+
+<p align="center">
+  <img src="docs/img/incident-response.svg" alt="PromptShield incident response workflow from alert triage through containment and recovery" width="100%">
+</p>
+
+<p align="center"><sub>Figure 9 — Incident response operating model</sub></p>
+
+## Network detection
+
+PromptShield includes network-oriented detection content for the LLM traffic path.
+
+<p align="center">
+  <img src="docs/img/suricata.svg" alt="PromptShield Suricata network detection flow" width="100%">
+</p>
+
+<p align="center"><sub>Figure 10 — Suricata inspection and signature workflow</sub></p>
+
+<p align="center">
+  <img src="docs/img/zeek.svg" alt="PromptShield Zeek telemetry and network analysis workflow" width="100%">
+</p>
+
+<p align="center"><sub>Figure 11 — Zeek telemetry and network analysis workflow</sub></p>
 
 ## Validation
 
