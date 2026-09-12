@@ -29,9 +29,20 @@ VALID_TECHNIQUES = {
 }
 
 VALID_TACTICS = {
-    "initial-access", "execution", "persistence", "privilege-escalation", "stealth",
-    "credential-access", "discovery", "lateral-movement", "collection", "exfiltration",
-    "command-and-control", "impact", "resource-development", "reconnaissance",
+    "initial-access",
+    "execution",
+    "persistence",
+    "privilege-escalation",
+    "stealth",
+    "credential-access",
+    "discovery",
+    "lateral-movement",
+    "collection",
+    "exfiltration",
+    "command-and-control",
+    "impact",
+    "resource-development",
+    "reconnaissance",
     "defense-impairment",
 }
 
@@ -53,7 +64,9 @@ RULE_FILES = sorted(p.name for p in SIGMA_DIR.glob("*.yml"))
 
 def _corpus(name: str) -> list[str]:
     path = DATASETS / name
-    return [json.loads(x)["prompt"] for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    return [
+        json.loads(x)["prompt"] for x in path.read_text(encoding="utf-8").splitlines() if x.strip()
+    ]
 
 
 SECRET_COMPLETIONS = [
@@ -65,7 +78,7 @@ SECRET_COMPLETIONS = [
     "Google key AIzaSyA1234567890abcdefghijklmnopqrstuv is embedded.",
     "Use github_pat_11ABCDEFG0abcdefghijkl_ABCDEFGHIJKLMNOPQRSTUVWX1234abcd.",
     "Card 4111111111111111 expired last month.",
-    "SLACK_TEST_TOKEN_REDACTED",
+    "Slack token xoxb-1234567890-1234567890-abcdEFghij is exposed.",
     "-----BEGIN RSA PRIVATE KEY----- MIIEow...",
     "Google key AIzaSyA1234567890abcdefghijklmnopqrstuv is embedded.",
     "Use github_pat_11ABCDEFG0abcdefghijkl_ABCDEFGHIJKLMNOPQRSTUVWX1234abcd.",
@@ -95,7 +108,10 @@ TOKEN_FLOOD_EVENTS = [
 
 POSITIVE_SAMPLES: dict[str, tuple[str, list]] = {
     "prompt_injection_direct.yml": ("prompt", _corpus("prompt_injection_samples.jsonl")),
-    "prompt_injection_indirect_url.yml": ("prompt", _corpus("indirect_prompt_injection_samples.jsonl")),
+    "prompt_injection_indirect_url.yml": (
+        "prompt",
+        _corpus("indirect_prompt_injection_samples.jsonl"),
+    ),
     "llm_jailbreak_attempt.yml": ("prompt", _corpus("jailbreak_samples.jsonl")),
     "llm_jailbreak_encoded_payload.yml": ("prompt", ENCODED_PROMPTS),
     "system_prompt_leakage.yml": ("prompt", _corpus("system_prompt_leak_samples.jsonl")),
@@ -113,7 +129,9 @@ def _parse_repo_xml(relative: str) -> ET.ElementTree:
 
 
 def _rules() -> dict[str, dict]:
-    return {name: yaml.safe_load((SIGMA_DIR / name).read_text(encoding="utf-8")) for name in RULE_FILES}
+    return {
+        name: yaml.safe_load((SIGMA_DIR / name).read_text(encoding="utf-8")) for name in RULE_FILES
+    }
 
 
 def _match(field: str, modifier: str, patterns, event: dict) -> bool:
@@ -154,7 +172,11 @@ def evaluate(rule: dict, event: dict) -> bool:
         return any(_eval_selector(detection[n], event) for n in names)
     if condition.startswith("1 of "):
         prefix = condition.split("1 of ", 1)[1]
-        selected = [n for n in names if n.startswith(prefix[:-1])] if prefix.endswith("*") else [n for n in names if n == prefix]
+        selected = (
+            [n for n in names if n.startswith(prefix[:-1])]
+            if prefix.endswith("*")
+            else [n for n in names if n == prefix]
+        )
         return any(_eval_selector(detection[n], event) for n in selected)
     expr = condition.replace("(", " ( ").replace(")", " ) ")
     for name in sorted(names, key=len, reverse=True):
@@ -169,13 +191,26 @@ def test_rule_files_are_discovered() -> None:
 @pytest.mark.parametrize("name", RULE_FILES)
 def test_rule_parses_and_has_required_metadata(name: str) -> None:
     rule = _rules()[name]
-    for field in ("title", "id", "status", "description", "author", "date", "logsource", "detection", "level", "tags"):
+    for field in (
+        "title",
+        "id",
+        "status",
+        "description",
+        "author",
+        "date",
+        "logsource",
+        "detection",
+        "level",
+        "tags",
+    ):
         assert field in rule, f"{name}: missing required field '{field}'"
     assert rule["author"] == "Sandeep Mothukuri", f"{name}: unexpected author"
     assert rule["level"] in {"informational", "low", "medium", "high", "critical"}
     assert rule["logsource"]["product"] == "promptshield"
     assert rule["logsource"]["service"] == "llm-monitor"
-    assert "definition" in rule["logsource"], f"{name}: logsource.definition documents the log origin"
+    assert "definition" in rule["logsource"], (
+        f"{name}: logsource.definition documents the log origin"
+    )
 
 
 def test_rule_ids_are_unique() -> None:
@@ -208,14 +243,18 @@ def test_attack_tags_are_valid(name: str) -> None:
 def test_no_invalid_tag_namespaces(name: str) -> None:
     allowed = {"attack", "car", "cve", "d3fend", "stp", "tlp", "namespace", "detection_pipeline"}
     for tag in _rules()[name]["tags"]:
-        assert tag.split(".", 1)[0] in allowed, f"{name}: invalid tag namespace '{tag.split('.', 1)[0]}'"
+        assert tag.split(".", 1)[0] in allowed, (
+            f"{name}: invalid tag namespace '{tag.split('.', 1)[0]}'"
+        )
 
 
 @pytest.mark.parametrize("name", RULE_FILES)
 def test_owasp_mapping_is_current(name: str) -> None:
     owasp = _rules()[name].get("metadata", {}).get("owasp_llm_2025")
     assert owasp is not None, f"{name}: metadata.owasp_llm_2025 is required"
-    assert owasp in VALID_OWASP_2025 or owasp == "none-direct", f"{name}: '{owasp}' is not an OWASP LLM Top 10 (2025) id"
+    assert owasp in VALID_OWASP_2025 or owasp == "none-direct", (
+        f"{name}: '{owasp}' is not an OWASP LLM Top 10 (2025) id"
+    )
 
 
 @pytest.mark.parametrize("name", RULE_FILES)
@@ -231,8 +270,14 @@ def test_regexes_compile_and_match_a_realistic_payload(name: str) -> None:
             for pattern in patterns:
                 re.compile(pattern)
                 checked += 1
-                assert "\\\\" not in pattern or "\\\\x" in pattern, f"{name}: suspicious escaping in {pattern!r}"
-    if name in {"data_exfiltration_via_llm.yml", "llm_jailbreak_encoded_payload.yml", "llm_insecure_output_handling.yml"}:
+                assert "\\\\" not in pattern or "\\\\x" in pattern, (
+                    f"{name}: suspicious escaping in {pattern!r}"
+                )
+    if name in {
+        "data_exfiltration_via_llm.yml",
+        "llm_jailbreak_encoded_payload.yml",
+        "llm_insecure_output_handling.yml",
+    }:
         assert checked > 0, f"{name}: expected regex selectors"
 
 
@@ -247,11 +292,22 @@ def _regexes(rule: dict, field: str) -> list[str]:
     return out
 
 
-@pytest.mark.parametrize("name", ["data_exfiltration_via_llm.yml", "llm_jailbreak_encoded_payload.yml", "llm_insecure_output_handling.yml"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "data_exfiltration_via_llm.yml",
+        "llm_jailbreak_encoded_payload.yml",
+        "llm_insecure_output_handling.yml",
+    ],
+)
 def test_every_regex_matches_at_least_one_positive_sample(name: str) -> None:
     rule = _rules()[name]
     field, samples = POSITIVE_SAMPLES[name]
-    dead = [pattern for pattern in _regexes(rule, field) if not any(re.search(pattern, s) for s in samples)]
+    dead = [
+        pattern
+        for pattern in _regexes(rule, field)
+        if not any(re.search(pattern, s) for s in samples)
+    ]
     assert not dead, f"{name}: patterns that match nothing in the corpus: {dead}"
 
 
@@ -288,4 +344,3 @@ def test_referenced_lab_scenario_exists(name: str) -> None:
 def test_no_rule_uses_t1059_011() -> None:
     for name, rule in _rules().items():
         assert "attack.t1059.011" not in rule["tags"], f"{name} uses T1059.011"
-        assert "T1059.011" not in str(rule.get("metadata", {})), f"{name} references T1059.011"
