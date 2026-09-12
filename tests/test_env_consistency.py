@@ -89,8 +89,7 @@ def test_declared_variables_are_documented_or_forwarded() -> None:
         p.read_text(encoding="utf-8", errors="ignore")
         for p in (ROOT / "scripts").glob("*.py")
     ) + "\n".join(
-        p.read_text(encoding="utf-8", errors="ignore")
-        for p in (ROOT / "scripts").glob("*.sh")
+        p.read_text(encoding="utf-8", errors="ignore") for p in (ROOT / "scripts").glob("*.sh")
     )
     monitor = "\n".join(
         (ROOT / "llm-monitor" / n).read_text(encoding="utf-8")
