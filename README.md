@@ -62,21 +62,9 @@ PromptShield-Lab is a self-hosted lab for LLM detection engineering. It covers t
 
 An inspecting proxy sits between the chat front-end and the model runtime so prompt and completion context can be converted into stable telemetry for detection engineering.
 
-<p align="center">
-  <img src="docs/img/attack-to-detection.svg" alt="PromptShield attack to detection to response workflow" width="100%">
-</p>
-
-<p align="center"><sub>Figure 2 — End-to-end attack, detection, investigation and response workflow</sub></p>
-
 ## Architecture
 
-The architecture is intentionally shown twice in the repository: once as the high-level system view above and again here as the implementation reference. The source diagram is [`docs/diagrams/architecture.mmd`](docs/diagrams/architecture.mmd).
-
-<p align="center">
-  <img src="docs/img/architecture.svg" alt="PromptShield layered implementation architecture" width="100%">
-</p>
-
-<p align="center"><sub>Figure 3 — Implementation architecture: application, telemetry, detections, search and analyst workflow</sub></p>
+The architecture is shown once at the top of this README as the primary visual reference. Its source is [`docs/diagrams/architecture.mmd`](docs/diagrams/architecture.mmd).
 
 ### Detection pipeline
 
@@ -84,7 +72,7 @@ The architecture is intentionally shown twice in the repository: once as the hig
   <img src="docs/img/detection-pipeline.svg" alt="PromptShield detection pipeline showing telemetry fan-out into Wazuh, Sigma and dashboards" width="100%">
 </p>
 
-<p align="center"><sub>Figure 4 — Telemetry contract and detection pipeline</sub></p>
+<p align="center"><sub>Figure 2 — Telemetry contract and detection pipeline</sub></p>
 
 Source: [`docs/diagrams/detection-pipeline.mmd`](docs/diagrams/detection-pipeline.mmd)
 
@@ -115,7 +103,7 @@ OpenWebUI → LLM-Monitor → Ollama
               └── hunting + playbooks
 ```
 
-The repository diagrams document this flow without fabricating live screenshots. Run the stack locally to generate environment-specific dashboard and alert screenshots.
+The repository diagrams document the implemented flow without fabricating live screenshots. Run the stack locally to generate environment-specific dashboard and alert screenshots.
 
 ## CLI
 
@@ -145,10 +133,10 @@ A blocked or failed request returns a non-zero exit code; successful requests re
 ## Lab scenarios
 
 <p align="center">
-  <img src="docs/img/attack-to-detection.svg" alt="PromptShield attack scenarios flowing through classification, telemetry, detection and response" width="100%">
+  <img src="docs/img/attack-to-detection.svg" alt="PromptShield attack to detection to response workflow" width="100%">
 </p>
 
-<p align="center"><sub>Figure 5 — Scenario execution path</sub></p>
+<p align="center"><sub>Figure 3 — End-to-end attack, detection, investigation and response workflow</sub></p>
 
 The scenarios move from adversarial input through the monitored request path and into detection and response workflows.
 
@@ -156,21 +144,9 @@ The scenarios move from adversarial input through the monitored request path and
 
 Ten Sigma rules, ten Wazuh rules, seven Suricata signatures and one Zeek script are maintained as version-controlled detection content.
 
-<p align="center">
-  <img src="docs/img/detection-pipeline.svg" alt="PromptShield schema contract consumed by Wazuh, Sigma and dashboards" width="100%">
-</p>
-
-<p align="center"><sub>Figure 6 — Detection content consumes one stable telemetry contract</sub></p>
-
 ## MITRE ATT&CK mapping
 
 The project maps supported LLM security behaviours to Enterprise ATT&CK where appropriate and uses MITRE ATLAS for ML-native behaviour.
-
-<p align="center">
-  <img src="docs/img/architecture.svg" alt="PromptShield detection architecture with ATT&CK and ATLAS mapping context" width="100%">
-</p>
-
-<p align="center"><sub>Figure 7 — Detection layer and ATT&CK / ATLAS context</sub></p>
 
 ## SOC investigation
 
@@ -181,12 +157,6 @@ The primary correlation key is `request_id`, with `session_id`, `user`, `source_
 ## Threat hunting
 
 The repository includes hypothesis-driven OpenSearch queries covering injection, jailbreaks, secrets, system-prompt extraction, token abuse, source anomalies and request pivots.
-
-<p align="center">
-  <img src="docs/img/attack-to-detection.svg" alt="PromptShield workflow showing investigation and threat hunting stages" width="100%">
-</p>
-
-<p align="center"><sub>Figure 8 — Detection findings feed investigation and threat hunting</sub></p>
 
 ## Dashboards
 
@@ -200,12 +170,6 @@ The imported dashboard bundle is stored under `dashboards/` and loaded by [`scri
 
 Response playbooks are designed around explicit safety gates and controlled automation.
 
-<p align="center">
-  <img src="docs/img/attack-to-detection.svg" alt="PromptShield workflow ending in incident response playbooks" width="100%">
-</p>
-
-<p align="center"><sub>Figure 9 — Detection-to-response operating model</sub></p>
-
 ## Validation
 
 The repository includes automated tests for detection rules, telemetry and pipeline behaviour.
@@ -216,7 +180,7 @@ Run the full test suite with:
 python -m pytest tests/ llm-monitor/tests/ -q
 ```
 
-The telemetry contract is the backbone of the validation model: one JSON event is written per inference request and consumed by Wazuh, Sigma, the `promptshield-*` index, hunting queries and dashboards. Schema drift is covered by the repository tests. cite-not-applicable
+The telemetry contract is the backbone of the validation model: one JSON event is written per inference request and consumed by Wazuh, Sigma, the `promptshield-*` index, hunting queries and dashboards. Schema drift is covered by the repository tests.
 
 ## Known limitations
 
