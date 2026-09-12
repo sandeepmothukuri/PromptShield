@@ -247,7 +247,7 @@ See the repository contribution guidance before opening changes.
 
 ## Licence
 
-MIT.
+MIT — see [LICENSE](LICENSE).
 
 ---
 
